@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{c8ad3c94-df7e-4372-a4e4-8c5ede62fd8e}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{d555baf8-afe8-4d5c-ab49-b05317e11b2b}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Header Files\Database">
+      <UniqueIdentifier>{09786667-59fe-4dbb-9902-00a826dbe0a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Database">
+      <UniqueIdentifier>{e11a4a23-d9a4-4b20-b9af-cd9676a5cc50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{089800db-4fc8-4273-b803-ac4eda10f44f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GA">
+      <UniqueIdentifier>{51817354-b479-4d21-b67e-0fe0a09df11c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{f51df3b3-d127-4de7-9243-42abf1729943}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GA">
+      <UniqueIdentifier>{fc696303-8ad0-469a-aa6d-bc17344c1534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GA\Misc">
+      <UniqueIdentifier>{1199a843-d50b-4bd7-b7ab-f5ce7c5dae3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GA\Problem">
+      <UniqueIdentifier>{931d6e57-4a8f-415b-9ad2-0261ded9ec7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GA\GASolver">
+      <UniqueIdentifier>{3abd298c-0c69-4488-b01e-de5a5b066a3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GA\GASolver\Selections">
+      <UniqueIdentifier>{3854b5b8-8b08-4a65-b1c2-36e1f43564be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GA\Misc">
+      <UniqueIdentifier>{7f4f33b9-f163-4e08-8c95-ba6eb9e4788f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GA\GASolver">
+      <UniqueIdentifier>{a432b3d0-16fd-43fc-a1f5-9cfea0aff63e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GA\Problem">
+      <UniqueIdentifier>{aab70583-9866-4ee5-b47c-6017c99fa10e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GA\GASolver\Selections">
+      <UniqueIdentifier>{17bbea58-c17d-489c-8815-8ac732619b9e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_gav2.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MainWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MainWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SolutionCreator.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SolutionCreator.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="DBManager.cpp">
+      <Filter>Source Files\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWidget.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="SolutionCreator.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BackpackProblem.cpp">
+      <Filter>Source Files\GA\Problem</Filter>
+    </ClCompile>
+    <ClCompile Include="GASolver.cpp">
+      <Filter>Source Files\GA\GASolver</Filter>
+    </ClCompile>
+    <ClCompile Include="Individual.cpp">
+      <Filter>Source Files\GA\GASolver</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Source Files\GA\Problem</Filter>
+    </ClCompile>
+    <ClCompile Include="ProbabilityGenerator.cpp">
+      <Filter>Source Files\GA\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Solution.cpp">
+      <Filter>Source Files\GA\Problem</Filter>
+    </ClCompile>
+    <ClCompile Include="TournamentSelection.cpp">
+      <Filter>Source Files\GA\GASolver\Selections</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="gav2.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MainWidget.h">
+      <Filter>Header Files\GUI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SolutionCreator.h">
+      <Filter>Header Files\GUI</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DBManager.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="BackpackProblem.h">
+      <Filter>Header Files\GA\Problem</Filter>
+    </ClInclude>
+    <ClInclude Include="GASolver.h">
+      <Filter>Header Files\GA\GASolver</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Header Files\GA\Problem</Filter>
+    </ClInclude>
+    <ClInclude Include="ProbabilityGenerator.h">
+      <Filter>Header Files\GA\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Solution.h">
+      <Filter>Header Files\GA\Problem</Filter>
+    </ClInclude>
+    <ClInclude Include="TournamentSelection.h">
+      <Filter>Header Files\GA\GASolver\Selections</Filter>
+    </ClInclude>
+    <ClInclude Include="Individual.h">
+      <Filter>Header Files\GA\GASolver</Filter>
+    </ClInclude>
+    <ClInclude Include="ISelection.h">
+      <Filter>Header Files\GA\GASolver\Selections</Filter>
+    </ClInclude>
+    <ClInclude Include="ISolver.h">
+      <Filter>Header Files\GA\GASolver</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

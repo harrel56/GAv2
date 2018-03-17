@@ -1,0 +1,23 @@
+base GA classes +
+base GUI +
+GA and GUI integration +
+database +
+	project +
+	implementation +
+solution creation working with GUI
+	and DB
+	field validation
+list of current solutions (in DB?)
+	treeWidget
+	color picker for every kind (best, avg, worst, deviation)
+plot drawing
+	automatically adjusting axes
+	basic plot drawing
+	multiple plot drawing with use of color pickers
+	clickable spots on the plot
+BP visualization
+	for best solution
+	for each point in a plot being clicked
+more GA classes/solvers/selections
+penalty function from lineEdit - RPN
+smooth and intuitive GUI
