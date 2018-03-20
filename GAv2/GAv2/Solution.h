@@ -7,7 +7,7 @@ class Solution
 public:
 	Solution(const Solution& sol);
 	Solution(Solution&& sol);
-	Solution(BackpackProblem& bpp);
+	Solution(BackpackProblem *bpp);
 
 	bool isValid() const;
 	int getTotalValue() const;
@@ -18,13 +18,13 @@ public:
 
 	int getSize() const;
 	bool* getData() const;
-	const BackpackProblem& getProblem() const;
+	const BackpackProblem *getProblem() const;
 
 	~Solution();
 
 protected:
 	int size;
 	bool* data;
-	BackpackProblem& problem;
+	BackpackProblem *problem;
 
 };

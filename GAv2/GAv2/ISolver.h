@@ -1,12 +1,12 @@
 #pragma once
 
 #include "BackpackProblem.h"
-#include "Solution.h"
+#include "SolutionData.h"
 
 class ISolver
 {
 public:
-	virtual Solution solve(BackpackProblem& bpp) = 0;
+	virtual SolutionData *solve(BackpackProblem* bpp) = 0;
 
 private:
 

@@ -80,6 +80,15 @@ void DBManager::insertProblem(BackpackProblem *bpp) const
 	db.commit();
 }
 
+void DBManager::insertSolution(int bppId, SolutionData *data) const
+{
+	db.transaction();
+	QSqlQuery query("INSERT INTO Solutions (Name, Capacity) VALUES (?, ?)");
+
+
+	db.commit();
+}
+
 bool DBManager::DBFileExists()
 {
 	QString path = QCoreApplication::applicationDirPath() + "/" + DB_NAME + ".db";
@@ -97,7 +106,7 @@ void DBManager::createNewDB()
 {
 	db.exec("CREATE TABLE Items(IdItem INTEGER NOT NULL PRIMARY KEY, Value integer(10) NOT NULL, Weight integer(10) NOT NULL, IdProblem integer(10) NOT NULL, FOREIGN KEY(IdProblem) REFERENCES Problems(IdProblem));");
 	db.exec("CREATE TABLE Problems(IdProblem INTEGER NOT NULL PRIMARY KEY, Name varchar(20) DEFAULT 'defaultName' NOT NULL, Capacity integer(10) NOT NULL);");
-	db.exec("CREATE TABLE SelectionParams(IdParam INTEGER NOT NULL PRIMARY KEY, Name varchar(255) NOT NULL, Value real(10) NOT NULL, IdSolve integer(10) NOT NULL, FOREIGN KEY(IdSolve) REFERENCES Solves(IdSolve));");
-	db.exec("CREATE TABLE Solves(IdSolve INTEGER NOT NULL PRIMARY KEY, MutationRate real(10) NOT NULL, CrossoverRate real(10) NOT NULL, CrossoverPoints integer(10) NOT NULL, PopulationSize integer(10) NOT NULL, GenerationCount integer(10) NOT NULL, SelectionName varchar(255) NOT NULL, IdProblem integer(10) NOT NULL, FOREIGN KEY(IdProblem) REFERENCES Problems(IdProblem));");
-	db.exec("CREATE TABLE TimePoints(IdSolve integer(10) NOT NULL, GenerationNumber integer(10) NOT NULL, BestValue real(10) NOT NULL, BestIndividual varchar(255) NOT NULL, AvgValue real(10) NOT NULL, AvgIndividual varchar(255) NOT NULL, WorstValue real(10) NOT NULL, WorstIndividual varchar(255) NOT NULL, StdDeviation real(10) NOT NULL, PRIMARY KEY(IdSolve, GenerationNumber), FOREIGN KEY(IdSolve) REFERENCES Solves(IdSolve));");
+	db.exec("CREATE TABLE SelectionParams(IdParam INTEGER NOT NULL PRIMARY KEY, Name text NOT NULL, Value text NOT NULL, IdSolve integer(10) NOT NULL, FOREIGN KEY(IdSolve) REFERENCES Solves(IdSolve));");
+	db.exec("CREATE TABLE Solutions(IdSolve INTEGER NOT NULL PRIMARY KEY, MutationRate real(10) NOT NULL, CrossoverRate real(10) NOT NULL, CrossoverPoints integer(10) NOT NULL, PopulationSize integer(10) NOT NULL, GenerationCount integer(10) NOT NULL, SelectionName varchar(255) NOT NULL, Repetitions integer(10) NOT NULL, IdProblem integer(10) NOT NULL, FOREIGN KEY(IdProblem) REFERENCES Problems(IdProblem));");
+	db.exec("CREATE TABLE TimePoints(IdSolve integer(10) NOT NULL, GenerationNumber integer(10) NOT NULL, BestValue real(10) NOT NULL, BestIndividual text NOT NULL, AvgValue real(10) NOT NULL, WorstValue real(10) NOT NULL, WorstIndividual text NOT NULL, StdDeviation real(10) NOT NULL, PRIMARY KEY(IdSolve, GenerationNumber), FOREIGN KEY(IdSolve) REFERENCES Solves(IdSolve));");
 }

@@ -125,6 +125,18 @@
     <ClCompile Include="TournamentSelection.cpp">
       <Filter>Source Files\GA\GASolver\Selections</Filter>
     </ClCompile>
+    <ClCompile Include="SolutionData.cpp">
+      <Filter>Source Files\GA\GASolver</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ProgressWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ProgressWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressWindow.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="gav2.qrc">
@@ -134,6 +146,9 @@
       <Filter>Header Files\GUI</Filter>
     </CustomBuild>
     <CustomBuild Include="SolutionCreator.h">
+      <Filter>Header Files\GUI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ProgressWindow.h">
       <Filter>Header Files\GUI</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -166,6 +181,9 @@
       <Filter>Header Files\GA\GASolver\Selections</Filter>
     </ClInclude>
     <ClInclude Include="ISolver.h">
+      <Filter>Header Files\GA\GASolver</Filter>
+    </ClInclude>
+    <ClInclude Include="SolutionData.h">
       <Filter>Header Files\GA\GASolver</Filter>
     </ClInclude>
   </ItemGroup>

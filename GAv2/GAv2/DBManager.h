@@ -12,6 +12,7 @@ public:
 	bool initializeDatabase();
 	QVector<BackpackProblem*> *fetchProblems();
 	void insertProblem(BackpackProblem *bpp) const;
+	void insertSolution(int bppId, SolutionData *data) const;
 
 private:
 	bool DBFileExists();

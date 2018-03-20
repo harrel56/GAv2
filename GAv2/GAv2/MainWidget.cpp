@@ -89,17 +89,58 @@ void MainWidget::refreshTreeWidget()
 		countItem->setText(1, QString::number(bpp->getItems().size()));
 		topItem->addChild(countItem);
 
-		QTreeWidgetItem *solveItem = new QTreeWidgetItem;
-		solveItem->setText(0, "Solves");
-		topItem->addChild(solveItem);
+		QTreeWidgetItem *solutionItem = new QTreeWidgetItem;
+		solutionItem->setText(0, "Solutions");
+		topItem->addChild(solutionItem);
 
-		QTreeWidgetItem *s1Item = new QTreeWidgetItem;
-		s1Item->setText(0, "solve1");
-		solveItem->addChild(s1Item);
+		for (SolutionData *solution : bpp->getSolutions())
+		{
+			QTreeWidgetItem *s1Item = new QTreeWidgetItem;
+			s1Item->setText(0, solution->getName());
+			solutionItem->addChild(s1Item);
 
-		QTreeWidgetItem *s2Item = new QTreeWidgetItem;
-		s2Item->setText(0, "solve2");
-		solveItem->addChild(s2Item);
+			QTreeWidgetItem *popItem = new QTreeWidgetItem;
+			popItem->setText(0, "Population:");
+			popItem->setText(1, QString::number(solution->getPopSize()));
+			s1Item->addChild(popItem);
+
+			QTreeWidgetItem *genItem = new QTreeWidgetItem;
+			genItem->setText(0, "Generations:");
+			genItem->setText(1, QString::number(solution->getGenerationCount()));
+			s1Item->addChild(genItem);
+
+			QTreeWidgetItem *mutItem = new QTreeWidgetItem;
+			mutItem->setText(0, "Mutation:");
+			mutItem->setText(1, QString::number(solution->getMutationChance()));
+			s1Item->addChild(mutItem);
+
+			QTreeWidgetItem *crossItem = new QTreeWidgetItem;
+			crossItem->setText(0, "Crossover:");
+			crossItem->setText(1, QString::number(solution->getCrossChance()));
+			s1Item->addChild(crossItem);
+
+			QTreeWidgetItem *pointsItem = new QTreeWidgetItem;
+			pointsItem->setText(0, "Points:");
+			pointsItem->setText(1, QString::number(solution->getCrossPoints()));
+			s1Item->addChild(pointsItem);
+
+			QTreeWidgetItem *repItem = new QTreeWidgetItem;
+			repItem->setText(0, "Repetitions:");
+			repItem->setText(1, QString::number(solution->getRepetitions()));
+			s1Item->addChild(repItem);
+
+			QTreeWidgetItem *selectionItem = new QTreeWidgetItem;
+			selectionItem->setText(0, solution->getSelectionName());
+			s1Item->addChild(selectionItem);
+
+			for (auto param : solution->getSelectionParams())
+			{
+				QTreeWidgetItem *paramItem = new QTreeWidgetItem;
+				paramItem->setText(0, param.first);
+				paramItem->setText(1, param.second);
+				selectionItem->addChild(paramItem);
+			}
+		}
 	}
 	
 	treeWidget->resizeColumnToContents(0);

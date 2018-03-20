@@ -2,13 +2,20 @@
 
 #include "ISolver.h"
 #include "ISelection.h"
+#include "SolutionData.h"
+#include "ProgressWindow.h"
 
-class GASolver : public ISolver
+#include <QtWidgets\qprogressbar.h>
+
+class GASolver
 {
 public:
-	GASolver();
+	GASolver(int popSize, int generationCount, double mutationChance, double crossChance, int crossPoints, int repetitions);
 
-	Solution solve(BackpackProblem& bpp);
+	SolutionData *solve(BackpackProblem *bpp, ProgressWindow *bar);
+
+	void setSelection(ISelection *selection);
+	void setCancelled(bool state);
 
 private:
 	ISelection *selection;
@@ -17,5 +24,8 @@ private:
 	double mutationChance;
 	double crossChance;
 	int crossPoints;
+	int repetitions;
+
+	bool cancelled;
 
 };

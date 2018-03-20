@@ -1,4 +1,8 @@
-﻿  SolutionCreator.cpp
-c:\users\harrel\desktop\cpp\gav2\gav2\solutioncreator.cpp(217): warning C4715: 'BasicPage::getValidationError': not all control paths return a value
+﻿  DBManager.cpp
+  moc_MainWidget.cpp
+  MainWidget.cpp
+  SolutionCreator.cpp
+  main.cpp
+  Generating Code...
   GAv2.vcxproj -> C:\Users\Harrel\Desktop\cpp\GAv2\Win32\Debug\GAv2.exe
   GAv2.vcxproj -> C:\Users\Harrel\Desktop\cpp\GAv2\Win32\Debug\GAv2.pdb (Full PDB)

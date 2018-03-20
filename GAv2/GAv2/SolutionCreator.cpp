@@ -1,8 +1,11 @@
 ﻿#include "SolutionCreator.h"
 #include "MainWidget.h"
+#include "ProgressWindow.h"
 #include "TournamentSelection.h"
+#include "GASolver.h"
 
 #include <QtWidgets\qmessagebox.h>
+#include <QtConcurrent\qtconcurrentrun.h>
 
 SolutionPage::SolutionPage(QWidget * parent) : QWidget(parent) {}
 
@@ -88,13 +91,15 @@ void ProblemPage::refreshData(QVector<BackpackProblem*> *data)
 	problemList->resizeColumnToContents(1);
 }
 
+BackpackProblem *ProblemPage::getSelectedProblem() { return selectedProblem; }
+
 void ProblemPage::setMainWidget(MainWidget *parent) { this->mainWidget = parent; }
 
 void ProblemPage::onNextButtonClicked()
 {
 	if (problemList->currentItem()->isSelected())
 	{
-		selectedIndex = problemList->currentIndex().row();
+		selectedProblem = data->at(problemList->currentIndex().row());
 		emit changeIndex(1);
 	}
 	else
@@ -176,13 +181,25 @@ BasicPage::BasicPage(QWidget * parent)
 
 	connect(nextButton, &QPushButton::clicked, this, &BasicPage::onNextButtonClicked);
 	connect(previousButton, &QPushButton::clicked, [&]() {emit changeIndex(0); });
+
+	//init default values for tests
+	mRateEdit->setText("0.01");
+	cRateEdit->setText("0.9");
+	pointsEdit->setText("1");
+	populationEdit->setText("200");
+	generationEdit->setText("100");
+	repetitionEdit->setText("3");
 }
+
+GASolver *BasicPage::getSelectedSolver() { return selectedSolver; }
 
 void BasicPage::onNextButtonClicked()
 {
-	QString errMsg = "";//getValidationError();
+	QString errMsg = getValidationError();
 	if (errMsg.isEmpty())
 	{
+		selectedSolver = new GASolver(populationEdit->text().toInt(), generationEdit->text().toInt(), mRateEdit->text().toDouble(),
+										cRateEdit->text().toDouble(), pointsEdit->text().toInt(), repetitionEdit->text().toInt());
 		emit changeIndex(2);
 	}
 	else
@@ -214,6 +231,8 @@ QString BasicPage::getValidationError()
 		return QString("Repetitions count has to be an integer from the range 1-1000");
 	if(!validRadio->isChecked() && !functionRadio->isChecked())
 		return QString("Validation method has to be chosen!");
+
+	return QString();
 }
 
 SelectionPage::SelectionPage(QWidget * parent)
@@ -256,7 +275,13 @@ SelectionPage::SelectionPage(QWidget * parent)
 
 	connect(finishButton, &QPushButton::clicked, this, &SelectionPage::onSolveButtonClicked);
 	connect(previousButton, &QPushButton::clicked, [&]() {emit changeIndex(1); });
+
+	//init default values for tests
+	sizeEdit->setText("5");
+	probEdit->setText("1.0");
 }
+
+ISelection *SelectionPage::getSelectedSelection() { return selectedSelection; }
 
 void SelectionPage::onListSelectionChange()
 {
@@ -275,6 +300,11 @@ void SelectionPage::onSolveButtonClicked()
 		{
 		case 0:
 			errMsg = getTournamentValidationError();
+			if (errMsg.isEmpty())
+			{
+				selectedSelection = new TournamentSelection(sizeEdit->text().toInt(), probEdit->text().toDouble());
+				emit solveClicked();
+			}
 			break;
 		case 1:
 			errMsg = getTestValidationError();
@@ -282,11 +312,8 @@ void SelectionPage::onSolveButtonClicked()
 		default:
 			break;
 		}
-		if (errMsg.isEmpty())
-		{
-			emit solveClicked();
-		}
-		else
+
+		if (!errMsg.isEmpty())
 		{
 			QMessageBox::warning(this, "Validation error", errMsg);
 		}
@@ -299,7 +326,15 @@ void SelectionPage::onSolveButtonClicked()
 
 QString SelectionPage::getTournamentValidationError()
 {
-	return "ELDOKA";
+	int tempInt = sizeEdit->text().toInt();
+	if (tempInt <= 0 || tempInt > 100)
+		return QString("Size has to be an integer from the range 1-100");
+	bool ok;
+	double tempDouble = probEdit->text().toDouble(&ok);
+	if (!ok || tempDouble < 0.0 || tempDouble > 1.0)
+		return QString("Probability has to be a real number from the range 0.0-1.0");
+
+	return QString();
 }
 
 QString SelectionPage::getTestValidationError()
@@ -309,7 +344,7 @@ QString SelectionPage::getTestValidationError()
 
 SolutionCreator::SolutionCreator(QWidget * parent) : QStackedWidget(parent), page1(new ProblemPage()), page2(new BasicPage()), page3(new SelectionPage())
 {
-	this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
+	this->setWindowFlags(Qt::WindowCloseButtonHint);
 	this->setWindowModality(Qt::ApplicationModal);
 	this->setMaximumSize(QSize(480, 320));
 	this->setMinimumSize(QSize(480, 320));
@@ -321,7 +356,7 @@ SolutionCreator::SolutionCreator(QWidget * parent) : QStackedWidget(parent), pag
 	connect(page1, SIGNAL(changeIndex(int)), this, SLOT(setCurrentIndex(int)));
 	connect(page2, SIGNAL(changeIndex(int)), this, SLOT(setCurrentIndex(int)));
 	connect(page3, SIGNAL(changeIndex(int)), this, SLOT(setCurrentIndex(int)));
-	connect(page3, SIGNAL(solveClicked()), this, SLOT(close()));
+	connect(page3, &SelectionPage::solveClicked, this, &SolutionCreator::onSolveClicked);
 }
 
 SolutionCreator::~SolutionCreator() {
@@ -345,4 +380,29 @@ void SolutionCreator::refreshData()
 void SolutionCreator::closeEvent(QCloseEvent *event)
 {
 	emit onClose();
+}
+
+void SolutionCreator::onSolveClicked()
+{
+	GASolver *solver = page2->getSelectedSolver();
+	solver->setSelection(page3->getSelectedSelection());
+	BackpackProblem *problem = page1->getSelectedProblem();
+	ProgressWindow *bar = new ProgressWindow;
+	connect(bar, &ProgressWindow::cancel, [&]() {solver->setCancelled(true); });
+	this->setWindowModality(Qt::NonModal);
+	bar->show();
+	//QtConcurrent::run(&GASolver::solve, page1->getSelectedProblem(), bar);
+	SolutionData *result = solver->solve(problem, bar);
+	bar->hide();
+	this->setWindowModality(Qt::ApplicationModal);
+	if (result == nullptr)
+	{
+		
+	}
+	else
+	{
+		result->setName("Solution " + QString::number(problem->getSolutions().size() + 1));
+		problem->addSolution(result);
+		mainWidget->refreshTreeWidget();
+	}
 }

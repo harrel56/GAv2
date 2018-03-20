@@ -53,4 +53,17 @@ void TournamentSelection::makeSelection(const vector<Individual>& pop, vector<In
 	}
 }
 
+QVector<pair<QString, QString>> TournamentSelection::getParams()
+{
+	QVector<pair<QString, QString>> result;
+	result.append(make_pair("Size", QString::number(size)));
+	result.append(make_pair("Probability", QString::number(probabilities[0])));
+	return result;
+}
+
+QString TournamentSelection::getName()
+{
+	return NAME;
+}
+
 TournamentSelection::~TournamentSelection() { delete probabilities; }

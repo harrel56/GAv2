@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "BackpackProblem.h"
+#include "GASolver.h"
 
 #include <QStackedWidget>
 #include <QtWidgets\qpushbutton.h>
@@ -38,7 +39,7 @@ public:
 	ProblemPage(QWidget *parent = Q_NULLPTR);
 
 	void refreshData(QVector<BackpackProblem*> *data);
-
+	BackpackProblem *getSelectedProblem();
 	void setMainWidget(MainWidget *parent);
 
 private:
@@ -48,7 +49,7 @@ private:
 
 	MainWidget *mainWidget;
 	QVector<BackpackProblem*> *data;
-	int selectedIndex;
+	BackpackProblem *selectedProblem;
 
 	QGroupBox *problemBox;
 	QGroupBox *generateBox;
@@ -84,9 +85,13 @@ class BasicPage : public SolutionPage
 public:
 	BasicPage(QWidget *parent = Q_NULLPTR);
 
+	GASolver *getSelectedSolver();
+
 private:
 	void onNextButtonClicked();
 	QString getValidationError();
+
+	GASolver *selectedSolver;
 
 	QGroupBox *mutationGroup;
 	QGroupBox *crossoverGroup;
@@ -129,12 +134,16 @@ class SelectionPage : public SolutionPage
 public:
 	SelectionPage(QWidget *parent = Q_NULLPTR);
 
+	ISelection *getSelectedSelection();
+
 private:
 	void onListSelectionChange();
 	void onSolveButtonClicked();
 
 	QString getTournamentValidationError();
 	QString getTestValidationError();
+
+	ISelection *selectedSelection;
 
 	QGroupBox *selectionGroup;
 	QGroupBox *paramGroup;
@@ -178,6 +187,8 @@ protected:
 	void closeEvent(QCloseEvent *event);
 
 private:
+	void onSolveClicked();
+
 	MainWidget *mainWidget;
 
 	ProblemPage *page1;

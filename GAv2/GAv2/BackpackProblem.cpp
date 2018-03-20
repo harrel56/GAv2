@@ -1,6 +1,7 @@
 #include <random>
 
 #include "BackpackProblem.h"
+#include "SolutionData.h"
 
 BackpackProblem::BackpackProblem(int id, const QString& name, int cap) : id(id), name(name), backpackCapacity(cap) {}
 
@@ -31,5 +32,9 @@ const QString& BackpackProblem::getName() const { return name; }
 int BackpackProblem::getBackpackCapacity() const { return backpackCapacity; }
 
 const QVector<Item>& BackpackProblem::getItems() const { return items; }
+
+const QVector<SolutionData*>& BackpackProblem::getSolutions() { return solutions; }
+
+void BackpackProblem::addSolution(SolutionData *solutionData) { solutions.append(solutionData); }
 
 //BackpackProblem::~BackpackProblem() { delete items; }

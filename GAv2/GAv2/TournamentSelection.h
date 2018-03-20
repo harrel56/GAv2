@@ -14,6 +14,8 @@ public:
 	TournamentSelection(int s, double prob);
 
 	void makeSelection(const vector<Individual>& pop, vector<Individual>& selected);
+	QVector<pair<QString, QString>> getParams();
+	QString getName();
 
 	~TournamentSelection();
 

@@ -7,7 +7,7 @@ using namespace std;
 class Individual : public Solution
 {
 public:
-	Individual(BackpackProblem& bpp);
+	Individual(BackpackProblem *bpp);
 	Individual(Individual&& ind);
 	Individual(const Individual& ind);
 
@@ -17,7 +17,9 @@ public:
 
 	Individual& operator=(const Individual& ind);
 
-	static vector<Individual> initializePop(int size, BackpackProblem& bpp);
+	static vector<Individual> initializePop(int size, BackpackProblem *bpp);
+	static const Individual *getBestIndividual(const vector<Individual>& pop);
+	static const Individual *getWorstIndividual(const vector<Individual>& pop);
 
 private:
 

@@ -4,10 +4,11 @@
 #include <iostream>
 #include <conio.h>
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 
-Individual::Individual(BackpackProblem& bpp) : Solution(bpp)
+Individual::Individual(BackpackProblem *bpp) : Solution(bpp)
 {
 	ProbabilityGenerator& rand = ProbabilityGenerator::getInstance();
 	for (int i = 0; i < size; i++)
@@ -72,6 +73,7 @@ void Individual::crossover(Individual& partner, int pts)
 		}
 	}
 
+	delete points;
 	//cout << endl << "Children: " << endl;
 	//for (int i = 0; i < size; i++)
 	//	cout << data[i];
@@ -96,10 +98,10 @@ int Individual::getTotalValue() const
 {
 	int value = Solution::getTotalValue();
 	int weight = Solution::getTotalWeight();
-	if (problem.getBackpackCapacity() > weight)
+	if (problem->getBackpackCapacity() > weight)
 		return value;
 	else
-		return value - (value / 10 - 10 * (problem.getBackpackCapacity() - weight));
+		return value - (value / 10 - 10 * (problem->getBackpackCapacity() - weight));
 }
 
 Individual& Individual::operator=(const Individual& ind)
@@ -119,7 +121,7 @@ Individual& Individual::operator=(const Individual& ind)
 	return *this;
 }
 
-vector<Individual> Individual::initializePop(int size, BackpackProblem& bpp)
+vector<Individual> Individual::initializePop(int size, BackpackProblem *bpp)
 {
 	vector<Individual> result;
 	result.reserve(size);
@@ -130,4 +132,50 @@ vector<Individual> Individual::initializePop(int size, BackpackProblem& bpp)
 	}
 
 	return result;
+}
+
+const Individual *Individual::getBestIndividual(const vector<Individual>& pop)
+{
+	int max = 0;
+	const Individual *best = nullptr;
+	int temp;
+	if (!pop.empty())
+		best = &pop[0];
+
+	for (const Individual& ind : pop)
+	{
+		if (ind.isValid())
+		{
+			temp = ind.getTotalValue();
+			if (temp > max)
+			{
+				max = temp;
+				best = &ind;
+			}
+		}
+	}
+	return best;
+}
+
+const Individual * Individual::getWorstIndividual(const vector<Individual>& pop)
+{
+	int min = numeric_limits<int>::max();
+	const Individual *worst = nullptr;
+	int temp;
+	if (!pop.empty())
+		worst = &pop[0];
+
+	for (const Individual& ind : pop)
+	{
+		if (ind.isValid())
+		{
+			temp = ind.getTotalValue();
+			if (temp < min)
+			{
+				min = temp;
+				worst = &ind;
+			}
+		}
+	}
+	return worst;
 }

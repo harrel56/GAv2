@@ -18,15 +18,15 @@ Solution::Solution(Solution&& sol) : problem(sol.problem), size(sol.size)
 	sol.data = nullptr;
 }
 
-Solution::Solution(BackpackProblem& bpp) : problem(bpp), size(bpp.getItems().size()) 
+Solution::Solution(BackpackProblem *bpp) : problem(bpp), size(bpp->getItems().size()) 
 {
 	data = new bool[size] {false};
 }
 
 bool Solution::isValid() const
 {
-	auto items = problem.getItems();
-	int cap = problem.getBackpackCapacity();
+	auto items = problem->getItems();
+	int cap = problem->getBackpackCapacity();
 	int sum = 0;
 
 	for (int i = 0; i < size; i++)
@@ -41,7 +41,7 @@ bool Solution::isValid() const
 
 int Solution::getTotalValue() const
 {
-	auto items = problem.getItems();
+	auto items = problem->getItems();
 	int val = 0;
 
 	for (int i = 0; i < size; i++)
@@ -54,7 +54,7 @@ int Solution::getTotalValue() const
 
 int Solution::getTotalWeight() const
 {
-	auto items = problem.getItems();
+	auto items = problem->getItems();
 	int result = 0;
 
 	for (int i = 0; i < size; i++)
@@ -98,7 +98,7 @@ int Solution::getSize() const { return size; }
 
 bool* Solution::getData() const { return data; }
 
-const BackpackProblem& Solution::getProblem() const { return problem; }
+const BackpackProblem *Solution::getProblem() const { return problem; }
 
 Solution::~Solution() { delete data; }
 

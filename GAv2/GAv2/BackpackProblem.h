@@ -4,6 +4,8 @@
 #include <QtCore\qvector.h>
 #include <QtCore\qstring.h>
 
+class SolutionData;
+
 class BackpackProblem
 {
 public:
@@ -18,6 +20,8 @@ public:
 	const QString& getName() const;
 	int getBackpackCapacity() const;
 	const QVector<Item>& getItems() const;
+	const QVector<SolutionData*>& getSolutions();
+	void addSolution(SolutionData *solutionData);
 
 	//~BackpackProblem();
 
@@ -26,5 +30,6 @@ private:
 	QString name;
 	int backpackCapacity;
 	QVector<Item> items;
+	QVector<SolutionData*> solutions;
 
 };
