@@ -101,7 +101,9 @@ private:
 	QFormLayout *mutationFormLayout;
 	QFormLayout *crossoverFormLayout;
 	QFormLayout *generalFormLayout;
-	QVBoxLayout *validationVLayout;
+	QFormLayout *validationFormLayout;
+	QHBoxLayout *fixedPenaltyLayout;
+	QHBoxLayout *progressPenaltyLayout;
 	QGridLayout *mainGridLayout;
 
 	QLabel *mRateLabel;
@@ -117,10 +119,15 @@ private:
 	QLineEdit *populationEdit;
 	QLineEdit *generationEdit;
 	QLineEdit *repetitionEdit;
-	QLineEdit *functionEdit;
 
-	QRadioButton *validRadio;
-	QRadioButton *functionRadio;
+	QLabel *fixedLabel1;
+	QLabel *fixedLabel2;
+	QLabel *progressLabel1;
+	QLabel *progressLabel2;
+
+	QLineEdit *fixedEdit;
+	QLineEdit *progressEdit1;
+	QLineEdit *progressEdit2;
 
 	QPushButton *previousButton;
 	QPushButton *nextButton;

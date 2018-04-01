@@ -6,6 +6,7 @@
 
 #include <QtWidgets\qmessagebox.h>
 #include <QtConcurrent\qtconcurrentrun.h>
+#include <iostream>
 
 SolutionPage::SolutionPage(QWidget * parent) : QWidget(parent) {}
 
@@ -82,8 +83,8 @@ void ProblemPage::refreshData(QVector<BackpackProblem*> *data)
 		topItem->addChild(countItem);
 
 		QTreeWidgetItem *solveItem = new QTreeWidgetItem;
-		solveItem->setText(0, "Solves:");
-		solveItem->setText(1, "temp");
+		solveItem->setText(0, "Solutions:");
+		solveItem->setText(1, QString::number(bpp->getSolutions().size()));
 		solveItem->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
 		topItem->addChild(solveItem);
 	}
@@ -97,7 +98,7 @@ void ProblemPage::setMainWidget(MainWidget *parent) { this->mainWidget = parent;
 
 void ProblemPage::onNextButtonClicked()
 {
-	if (problemList->currentItem()->isSelected())
+	if (problemList->currentItem() != nullptr && problemList->currentItem()->isSelected())
 	{
 		selectedProblem = data->at(problemList->currentIndex().row());
 		emit changeIndex(1);
@@ -151,11 +152,28 @@ QString ProblemPage::getValidationError()
 BasicPage::BasicPage(QWidget * parent)
 	: SolutionPage(parent),
 	mutationGroup(new QGroupBox("Mutation")), crossoverGroup(new QGroupBox("Crossover")), generalGroup(new QGroupBox("General")), validationGroup(new QGroupBox("Solution validation")),
-	mRateLabel(new QLabel("Rate")), cRateLabel(new QLabel("Rate")), pointsLabel(new QLabel("Points")), populationLabel(new QLabel("Population size")), generationLabel(new QLabel("Generations count")), repetitionLabel(new QLabel("Repetitions")),
-	mRateEdit(new QLineEdit), cRateEdit(new QLineEdit), pointsEdit(new QLineEdit), populationEdit(new QLineEdit), generationEdit(new QLineEdit), repetitionEdit(new QLineEdit), functionEdit(new QLineEdit),
-	validRadio(new QRadioButton("Only valid solutions")), functionRadio(new QRadioButton("Penalty function")), previousButton(new QPushButton("Back")), nextButton(new QPushButton("Next")),
-	mutationFormLayout(new QFormLayout), crossoverFormLayout(new QFormLayout), generalFormLayout(new QFormLayout), validationVLayout(new QVBoxLayout), mainGridLayout(new QGridLayout(this))
+	mRateLabel(new QLabel("Probability")), cRateLabel(new QLabel("Probability")), pointsLabel(new QLabel("Points")), populationLabel(new QLabel("Population size")), generationLabel(new QLabel("Generations count")), repetitionLabel(new QLabel("Repetitions")),
+	mRateEdit(new QLineEdit), cRateEdit(new QLineEdit), pointsEdit(new QLineEdit), populationEdit(new QLineEdit), generationEdit(new QLineEdit), repetitionEdit(new QLineEdit),
+	fixedLabel1(new QLabel("Fixed penalty")), fixedLabel2(new QLabel("% of total value")), progressLabel1(new QLabel("Progressive penalty")), progressLabel2(new QLabel(" * (weight-capacity)^")),
+	fixedEdit(new QLineEdit), progressEdit1(new QLineEdit), progressEdit2(new QLineEdit),
+	previousButton(new QPushButton("Back")), nextButton(new QPushButton("Next")),
+	fixedPenaltyLayout(new QHBoxLayout), progressPenaltyLayout(new QHBoxLayout),
+	mutationFormLayout(new QFormLayout), crossoverFormLayout(new QFormLayout), generalFormLayout(new QFormLayout), validationFormLayout(new QFormLayout), mainGridLayout(new QGridLayout(this))
 {
+	//int defaultWidth = mRateEdit->sizeHint().width();
+	//mRateEdit->setFixedWidth(defaultWidth / 2);
+	//cRateEdit->setFixedWidth(defaultWidth / 2);
+	//pointsEdit->setFixedWidth(defaultWidth / 2);
+	//populationEdit->setFixedWidth(defaultWidth / 2);
+	//generationEdit->setFixedWidth(defaultWidth / 2);
+	//repetitionEdit->setFixedWidth(defaultWidth / 2);
+	//fixedEdit->setFixedWidth(defaultWidth / 2);
+	//progressEdit1->setFixedWidth(defaultWidth / 2);
+	//progressEdit2->setFixedWidth(defaultWidth / 2);
+
+	//mutationFormLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+	//generalFormLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+
 	mutationFormLayout->addRow(mRateLabel, mRateEdit);
 	crossoverFormLayout->addRow(cRateLabel, cRateEdit);
 	crossoverFormLayout->addRow(pointsLabel, pointsEdit);
@@ -163,21 +181,27 @@ BasicPage::BasicPage(QWidget * parent)
 	generalFormLayout->addRow(generationLabel, generationEdit);
 	generalFormLayout->addRow(repetitionLabel, repetitionEdit);
 
-	validationVLayout->addWidget(validRadio);
-	validationVLayout->addWidget(functionRadio);
-	validationVLayout->addWidget(functionEdit);
+	fixedPenaltyLayout->addWidget(fixedEdit);
+	fixedPenaltyLayout->addWidget(fixedLabel2);
+
+	progressPenaltyLayout->addWidget(progressEdit1);
+	progressPenaltyLayout->addWidget(progressLabel2);
+	progressPenaltyLayout->addWidget(progressEdit2);
+
+	validationFormLayout->addRow(fixedLabel1, fixedPenaltyLayout);
+	validationFormLayout->addRow(progressLabel1, progressPenaltyLayout);
 
 	mutationGroup->setLayout(mutationFormLayout);
 	crossoverGroup->setLayout(crossoverFormLayout);
 	generalGroup->setLayout(generalFormLayout);
-	validationGroup->setLayout(validationVLayout);
+	validationGroup->setLayout(validationFormLayout);
 
 	mainGridLayout->addWidget(mutationGroup, 0, 0);
 	mainGridLayout->addWidget(crossoverGroup, 1, 0);
-	mainGridLayout->addWidget(generalGroup, 0, 1);
-	mainGridLayout->addWidget(validationGroup, 1, 1);
-	mainGridLayout->addWidget(previousButton, 2, 0);
-	mainGridLayout->addWidget(nextButton, 2, 1);
+	mainGridLayout->addWidget(generalGroup, 0, 1, 2, 1);
+	mainGridLayout->addWidget(validationGroup, 2, 0, 1, 2);
+	mainGridLayout->addWidget(previousButton, 3, 0);
+	mainGridLayout->addWidget(nextButton, 3, 1);
 
 	connect(nextButton, &QPushButton::clicked, this, &BasicPage::onNextButtonClicked);
 	connect(previousButton, &QPushButton::clicked, [&]() {emit changeIndex(0); });
@@ -189,6 +213,9 @@ BasicPage::BasicPage(QWidget * parent)
 	populationEdit->setText("200");
 	generationEdit->setText("100");
 	repetitionEdit->setText("3");
+	fixedEdit->setText("10.0");
+	progressEdit1->setText("10.0");
+	progressEdit2->setText("1");
 }
 
 GASolver *BasicPage::getSelectedSolver() { return selectedSolver; }
@@ -198,8 +225,9 @@ void BasicPage::onNextButtonClicked()
 	QString errMsg = getValidationError();
 	if (errMsg.isEmpty())
 	{
-		selectedSolver = new GASolver(populationEdit->text().toInt(), generationEdit->text().toInt(), mRateEdit->text().toDouble(),
-										cRateEdit->text().toDouble(), pointsEdit->text().toInt(), repetitionEdit->text().toInt());
+		selectedSolver = new GASolver(populationEdit->text().toInt(), generationEdit->text().toInt(), mRateEdit->text().replace(',', '.').toDouble(),
+										cRateEdit->text().replace(',', '.').toDouble(), pointsEdit->text().toInt(), repetitionEdit->text().toInt(),
+										fixedEdit->text().toDouble(), progressEdit1->text().toDouble(), progressEdit2->text().toDouble());
 		emit changeIndex(2);
 	}
 	else
@@ -211,10 +239,10 @@ void BasicPage::onNextButtonClicked()
 QString BasicPage::getValidationError()
 {
 	bool ok;
-	double tempDouble = mRateEdit->text().toDouble(&ok);
+	double tempDouble = mRateEdit->text().replace(',', '.').toDouble(&ok);
 	if (!ok || tempDouble < 0.0 || tempDouble > 1.0)
 		return QString("Mutation rate has to be a real number from the range 0.0-1.0");
-	tempDouble = cRateEdit->text().toDouble(&ok);
+	tempDouble = cRateEdit->text().replace(',', '.').toDouble(&ok);
 	if (!ok || tempDouble < 0.0 || tempDouble > 1.0)
 		return QString("Crossover probability has to be a real number from the range 0.0-1.0");
 	int tempInt = pointsEdit->text().toInt();
@@ -229,8 +257,15 @@ QString BasicPage::getValidationError()
 	tempInt = repetitionEdit->text().toInt();
 	if (tempInt < 1 || tempInt > 1000)
 		return QString("Repetitions count has to be an integer from the range 1-1000");
-	if(!validRadio->isChecked() && !functionRadio->isChecked())
-		return QString("Validation method has to be chosen!");
+	tempDouble = fixedEdit->text().replace(',', '.').toDouble(&ok);
+	if (!ok || tempDouble < 0.0 || tempDouble > 100.0)
+			return QString("Fixed penalty has to be a real number from the range 0.0-100.0");
+	tempDouble = progressEdit1->text().replace(',', '.').toDouble(&ok);
+	if (!ok || tempDouble < 0.0 || tempDouble > 10000.0)
+		return QString("Progressive penalty coefficient has to be a real number from the range 0.0-10000.0");
+	tempDouble = progressEdit2->text().replace(',', '.').toDouble(&ok);
+	if (!ok || tempDouble < 0.0 || tempDouble > 100.0)
+		return QString("Progressive penalty power has to be a real number from the range 0.0-100.0");
 
 	return QString();
 }
@@ -302,7 +337,7 @@ void SelectionPage::onSolveButtonClicked()
 			errMsg = getTournamentValidationError();
 			if (errMsg.isEmpty())
 			{
-				selectedSelection = new TournamentSelection(sizeEdit->text().toInt(), probEdit->text().toDouble());
+				selectedSelection = new TournamentSelection(sizeEdit->text().toInt(), probEdit->text().replace(',', '.').toDouble());
 				emit solveClicked();
 			}
 			break;
@@ -330,7 +365,7 @@ QString SelectionPage::getTournamentValidationError()
 	if (tempInt <= 0 || tempInt > 100)
 		return QString("Size has to be an integer from the range 1-100");
 	bool ok;
-	double tempDouble = probEdit->text().toDouble(&ok);
+	double tempDouble = probEdit->text().replace(',', '.').toDouble(&ok);
 	if (!ok || tempDouble < 0.0 || tempDouble > 1.0)
 		return QString("Probability has to be a real number from the range 0.0-1.0");
 
@@ -403,6 +438,9 @@ void SolutionCreator::onSolveClicked()
 	{
 		result->setName("Solution " + QString::number(problem->getSolutions().size() + 1));
 		problem->addSolution(result);
+		mainWidget->getDBManager().insertSolution(problem->getId(), problem->getItems().size(), result);
 		mainWidget->refreshTreeWidget();
+		page1->refreshData(mainWidget->getData());
+
 	}
 }

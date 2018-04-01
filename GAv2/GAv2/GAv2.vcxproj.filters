@@ -75,6 +75,12 @@
     <Filter Include="Source Files\GA\GASolver\Selections">
       <UniqueIdentifier>{17bbea58-c17d-489c-8815-8ac732619b9e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GUI\QCustomPlot">
+      <UniqueIdentifier>{6e903243-f9a8-4a8f-a392-a576a220527c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GUI\QCustomPlot">
+      <UniqueIdentifier>{a92806af-35c3-48c2-b670-ce75771c7f0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -137,6 +143,27 @@
     <ClCompile Include="ProgressWindow.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qcustomplot.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qcustomplot.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="qcustomplot.cpp">
+      <Filter>Source Files\GUI\QCustomPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeItemForPlot.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BackpackView.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_BackpackView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_BackpackView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="gav2.qrc">
@@ -149,6 +176,15 @@
       <Filter>Header Files\GUI</Filter>
     </CustomBuild>
     <CustomBuild Include="ProgressWindow.h">
+      <Filter>Header Files\GUI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qcustomplot.h">
+      <Filter>Header Files\GUI\QCustomPlot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="TreeItemForPlot.h">
+      <Filter>Header Files\GUI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BackpackView.h">
       <Filter>Header Files\GUI</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -10,12 +10,14 @@
 class GASolver
 {
 public:
-	GASolver(int popSize, int generationCount, double mutationChance, double crossChance, int crossPoints, int repetitions);
+	GASolver(int popSize, int generationCount, double mutationChance, double crossChance, int crossPoints, int repetitions, double funParam1, double funParam2, double funParam3);
 
 	SolutionData *solve(BackpackProblem *bpp, ProgressWindow *bar);
 
 	void setSelection(ISelection *selection);
 	void setCancelled(bool state);
+
+	static bool *copyArray(bool *data, int size);
 
 private:
 	ISelection *selection;
@@ -25,6 +27,10 @@ private:
 	double crossChance;
 	int crossPoints;
 	int repetitions;
+
+	double funParam1;
+	double funParam2;
+	double funParam3;
 
 	bool cancelled;
 

@@ -1,10 +1,12 @@
 #include "MainWidget.h"
+#include "TreeItemForPlot.h"
 
+#include <iostream>
 #include <QtWidgets\qmessagebox.h>
 #include <QtWidgets\qheaderview.h>
 
 MainWidget::MainWidget(QWidget *parent)
-	: QWidget(parent), treeWidget(new QTreeWidget()), backpackView(new QGraphicsView()), plotView(new QGraphicsView()),
+	: QWidget(parent), treeWidget(new QTreeWidget()), backpackView(new BackpackView), plotView(new QCustomPlot),
 	setButton(new QPushButton("Set active")), removeButton(new QPushButton("Remove")), saveButton(new QPushButton("Save to file")), loadButton(new QPushButton("Load from file")), createButton(new QPushButton("Create new GA solution")),
 	buttonsVLayout(new QVBoxLayout()), leftVLayout(new QVBoxLayout()), mainHLayout(new QHBoxLayout(this)),
 	solutionCreator(nullptr),
@@ -48,15 +50,22 @@ MainWidget::MainWidget(QWidget *parent)
 		QMessageBox::critical(this, "Error", "Database could not be initialized!");
 	}
 	
-	//treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	treeWidget->setHeaderLabels({ "Name", "Value" });
 	treeWidget->setColumnCount(2);
+	treeWidget->setIndentation(15);
 	connect(treeWidget, &QTreeWidget::itemExpanded, [&]() {treeWidget->resizeColumnToContents(0);
 															treeWidget->resizeColumnToContents(1); });
 	connect(treeWidget, &QTreeWidget::itemCollapsed, [&]() {treeWidget->resizeColumnToContents(0);
 															treeWidget->resizeColumnToContents(1); });
+	connect(treeWidget, &QTreeWidget::itemChanged, this, &MainWidget::onTreeItemChanged);
 	data = dbManager.fetchProblems();
 	refreshTreeWidget();
+
+	plotView->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+	//plotView->setInteractions(QCP::iSelectItems);
+	plotView->yAxis->setLabel("Fitness");
+	plotView->xAxis->setLabel("Generation");
+
 }
 
 MainWidget::~MainWidget()
@@ -70,6 +79,7 @@ QVector<BackpackProblem*> *MainWidget::getData() const { return this->data; }
 
 void MainWidget::refreshTreeWidget()
 {
+	plotView->clearGraphs();
 	treeWidget->clear();
 
 	for (BackpackProblem *bpp : *data)
@@ -81,7 +91,6 @@ void MainWidget::refreshTreeWidget()
 		QTreeWidgetItem *capItem = new QTreeWidgetItem;
 		capItem->setText(0, "Capacity:");
 		capItem->setText(1, QString::number(bpp->getBackpackCapacity()));
-		capItem->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
 		topItem->addChild(capItem);
 
 		QTreeWidgetItem *countItem = new QTreeWidgetItem;
@@ -98,6 +107,40 @@ void MainWidget::refreshTreeWidget()
 			QTreeWidgetItem *s1Item = new QTreeWidgetItem;
 			s1Item->setText(0, solution->getName());
 			solutionItem->addChild(s1Item);
+
+			QTreeWidgetItem *plotItem = new QTreeWidgetItem;
+			plotItem->setText(0, "Plotting");
+			s1Item->addChild(plotItem);
+
+			TreeItemForPlot *bestItem = new TreeItemForPlot;
+			bestItem->setText(0, "Best:");
+			bestItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+			bestItem->setCheckState(1, Qt::Unchecked);
+			bestItem->setData(solution->getBestData());
+			bestItem->setProblem(bpp);
+			bestItem->setIndividuals(solution->getBestIndividuals());
+			plotItem->addChild(bestItem);
+
+			TreeItemForPlot *avgItem = new TreeItemForPlot;
+			avgItem->setText(0, "Average:");
+			avgItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+			avgItem->setCheckState(1, Qt::Unchecked);
+			avgItem->setData(solution->getAverageData());
+			plotItem->addChild(avgItem);
+
+			TreeItemForPlot *worstItem = new TreeItemForPlot;
+			worstItem->setText(0, "Worst:");
+			worstItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+			worstItem->setCheckState(1, Qt::Unchecked);
+			worstItem->setData(solution->getWorstData());
+			plotItem->addChild(worstItem);
+
+			TreeItemForPlot *devItem = new TreeItemForPlot;
+			devItem->setText(0, "Deviation:");
+			devItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+			devItem->setCheckState(1, Qt::Unchecked);
+			devItem->setData(solution->getDeviationData());
+			plotItem->addChild(devItem);
 
 			QTreeWidgetItem *popItem = new QTreeWidgetItem;
 			popItem->setText(0, "Population:");
@@ -140,9 +183,55 @@ void MainWidget::refreshTreeWidget()
 				paramItem->setText(1, param.second);
 				selectionItem->addChild(paramItem);
 			}
+
+			QTreeWidgetItem *functionItem = new QTreeWidgetItem;
+			functionItem->setText(0, "Penalty function:");
+			functionItem->setText(1, "totalValue * " + QString::number(solution->getPenaltyFixed()) + " + " + QString::number(solution->getPenaltyParam()) + " * (totalWeight - capacity)^" + QString::number(solution->getPenaltyPower()));
+			s1Item->addChild(functionItem);
+
 		}
 	}
 	
 	treeWidget->resizeColumnToContents(0);
 	treeWidget->resizeColumnToContents(1);
+}
+
+void MainWidget::onTreeItemChanged(QTreeWidgetItem *item, int column)
+{
+	auto plotItem = dynamic_cast<TreeItemForPlot*>(item);
+	if (item->checkState(column) == Qt::Checked)
+	{
+		QVector<double> keys(plotItem->getData().size());
+		for (int i = 0; i < keys.size(); ++i)
+		{
+			keys[i] = i;
+		}
+		plotItem->setGraph(plotView->addGraph());
+		plotItem->getGraph()->setData(keys, plotItem->getData(), true);
+		plotItem->getGraph()->setName(plotItem->text(0).left(plotItem->text(0).size() - 1));
+
+		if (plotItem->text(0) == "Best:")
+		{
+			plotItem->getGraph()->setSelectable(QCP::stSingleData);
+			plotItem->getGraph()->setScatterStyle(QCPScatterStyle::ssCircle);
+			std::cout << plotItem->getIndividuals().size() << std::endl;
+			connect(plotItem->getGraph(), static_cast<void (QCPAbstractPlottable::*)(const QCPDataSelection&)>(&QCPAbstractPlottable::selectionChanged), [=](const QCPDataSelection& data)
+			{
+				bool *individual = plotItem->getIndividuals().at(data.dataRange().begin());
+				backpackView->draw(plotItem->getProblem(), individual);
+			});
+		}
+	}
+	else
+	{
+		plotView->removeGraph(plotItem->getGraph());
+	}
+
+	if (plotView->graphCount() == 0)
+		plotView->legend->setVisible(false);
+	else
+		plotView->legend->setVisible(true);
+
+	plotView->rescaleAxes();
+	plotView->replot();
 }

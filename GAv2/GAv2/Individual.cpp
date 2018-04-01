@@ -5,8 +5,13 @@
 #include <conio.h>
 #include <algorithm>
 #include <limits>
+#include <math.h>
 
 using namespace std;
+
+double Individual::fixedPenalty;
+double Individual::progressParam;
+double Individual::progressPower;
 
 Individual::Individual(BackpackProblem *bpp) : Solution(bpp)
 {
@@ -101,7 +106,7 @@ int Individual::getTotalValue() const
 	if (problem->getBackpackCapacity() > weight)
 		return value;
 	else
-		return value - (value / 10 - 10 * (problem->getBackpackCapacity() - weight));
+		return value - (value * Individual::fixedPenalty - Individual::progressParam * std::pow(problem->getBackpackCapacity() - weight, Individual::progressPower));
 }
 
 Individual& Individual::operator=(const Individual& ind)
@@ -119,6 +124,13 @@ Individual& Individual::operator=(const Individual& ind)
 			data[i] = ind.data[i];
 	}
 	return *this;
+}
+
+void Individual::setPenaltyParams(double fixed, double param, double penaltyPower)
+{
+	Individual::fixedPenalty = fixed;
+	Individual::progressParam = param;
+	Individual::progressPower = penaltyPower;
 }
 
 vector<Individual> Individual::initializePop(int size, BackpackProblem *bpp)
@@ -178,4 +190,18 @@ const Individual * Individual::getWorstIndividual(const vector<Individual>& pop)
 		}
 	}
 	return worst;
+}
+
+const double Individual::getAverageValue(const vector<Individual>& pop)
+{
+	double sum = 0.0;
+
+	for (const Individual& ind : pop)
+	{
+		if (ind.isValid())
+		{
+			sum += ind.getTotalValue();
+		}
+	}
+	return sum / pop.size();
 }

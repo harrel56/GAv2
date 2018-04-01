@@ -13,14 +13,14 @@ public:
 
 	BackpackProblem() = delete;
 	BackpackProblem(int id, const QString& name, int cap);
-	BackpackProblem(int id, const QString& name, int cap, QVector<Item>&& ritem);
+	BackpackProblem(int id, const QString& name, int cap, QVector<Item>&& ritem, QVector<SolutionData*>&& solutions);
 
 	void setId(int id);
 	int getId() const;
 	const QString& getName() const;
 	int getBackpackCapacity() const;
 	const QVector<Item>& getItems() const;
-	const QVector<SolutionData*>& getSolutions();
+	const QVector<SolutionData*>& getSolutions() const;
 	void addSolution(SolutionData *solutionData);
 
 	//~BackpackProblem();

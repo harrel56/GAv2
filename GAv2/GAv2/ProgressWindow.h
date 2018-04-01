@@ -13,6 +13,8 @@ public:
 	ProgressWindow(QWidget * parent = Q_NULLPTR);
 	~ProgressWindow();
 
+	void succeeded();
+
 	void setRepetition(int r);
 	void setGeneration(int g);
 	void setMaxValue(int max);

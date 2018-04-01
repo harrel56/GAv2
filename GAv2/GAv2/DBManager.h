@@ -12,9 +12,12 @@ public:
 	bool initializeDatabase();
 	QVector<BackpackProblem*> *fetchProblems();
 	void insertProblem(BackpackProblem *bpp) const;
-	void insertSolution(int bppId, SolutionData *data) const;
+	void insertSolution(int bppId, int itemCount, SolutionData *data) const;
 
 private:
+	QString boolToQString(const bool *data, int size) const;
+	bool *qstringToBool(const QString& str) const;
+
 	bool DBFileExists();
 	void addDB();
 	void createNewDB();

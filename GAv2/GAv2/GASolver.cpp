@@ -12,8 +12,9 @@
 
 using namespace std;
 
-GASolver::GASolver(int popSize, int generationCount, double mutationChance, double crossChance, int crossPoints, int repetitions) :
-	popSize(popSize), generationCount(generationCount), mutationChance(mutationChance), crossChance(crossChance), crossPoints(crossPoints), repetitions(repetitions), cancelled(false)
+GASolver::GASolver(int popSize, int generationCount, double mutationChance, double crossChance, int crossPoints, int repetitions, double funParam1, double funParam2, double funParam3) :
+	popSize(popSize), generationCount(generationCount), mutationChance(mutationChance), crossChance(crossChance), crossPoints(crossPoints), repetitions(repetitions), cancelled(false),
+	funParam1(funParam1), funParam2(funParam2), funParam3(funParam3)
 {
 
 }
@@ -25,29 +26,43 @@ void GASolver::setCancelled(bool state)
 	this->cancelled = state;
 }
 
+bool *GASolver::copyArray(bool *data, int size)
+{
+	bool *result = new bool[size];
+	//std::copy(data, data + size, result);
+	for (int i = 0; i < size; ++i)
+	{
+		result[i] = data[i];
+	}
+	return result;
+}
+
 SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 {
 	//Initialize 2 sets of individuals to avoid further individual object creations
+	Individual::setPenaltyParams(funParam1, funParam2, funParam3);
 	auto population = Individual::initializePop(popSize, bpp);
 	auto selectedPopulation = Individual::initializePop(popSize, bpp);
 
 	//Get custom RNG
 	ProbabilityGenerator& rand = ProbabilityGenerator::getInstance();
 
-	SolutionData *result = new SolutionData(selection, popSize, generationCount, mutationChance, crossChance, crossPoints, repetitions);
+	SolutionData *result = new SolutionData(selection, popSize, generationCount, mutationChance, crossChance, crossPoints, repetitions, funParam1, funParam2, funParam3);
 	QVector<QVector<TimePoint>> timePointsData(repetitions);
 
-	auto sumFunction = [](int acc, const Individual& ind) { return acc + ind.getTotalValue(); };
 	bar->setMaxValue(generationCount * repetitions);
 
 	for (int r = 0; r < repetitions; ++r)
 	{
+		timePointsData[r].reserve(generationCount);
 		for (int n = 0; n < generationCount; ++n)
 		{
 			auto indMax = Individual::getBestIndividual(population);
+			int valMax = indMax->getTotalValue();
 			auto indMin = Individual::getWorstIndividual(population);
-			double avgVal = accumulate(population.cbegin(), population.cend(), 0, sumFunction) / (double)population.size();
-			timePointsData[r].append(TimePoint(indMax->getTotalValue(), avgVal, indMin->getTotalValue(), indMax->getData(), indMin->getData()));
+			int valMin = indMin->getTotalValue();
+			double avgVal = Individual::getAverageValue(population);
+			timePointsData[r].append(TimePoint(valMax < 0 ? 0 : valMax, avgVal, valMin < 0 ? 0 : valMin, copyArray(indMax->getData(), bpp->getItems().size()), copyArray(indMin->getData(), bpp->getItems().size())));
 
 			//Put best individuals in 'selectedPopulation'
 			selection->makeSelection(population, selectedPopulation);
@@ -82,7 +97,7 @@ SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 		}
 	}
 
-	//Fill the result with avg values
+	//Fill the result
 	for (int n = 0; n < generationCount; ++n)
 	{
 		double sumBest = 0.0;
@@ -114,9 +129,10 @@ SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 
 		(*result->getTimePoints())[n].bestValue = sumBest / repetitions;
 		(*result->getTimePoints())[n].worstValue = sumWorst / repetitions;
-		(*result->getTimePoints())[n].bestData = bestData;
-		(*result->getTimePoints())[n].worstData = worstData;
+		(*result->getTimePoints())[n].bestData = copyArray(bestData, bpp->getItems().size());
+		(*result->getTimePoints())[n].worstData = copyArray(worstData, bpp->getItems().size());
 		double avgAvg = sumAvg / repetitions;
+		(*result->getTimePoints())[n].avgValue = avgAvg;
 
 		sumAvg = 0.0;
 		for (int r = 0; r < repetitions; ++r)
@@ -127,5 +143,6 @@ SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 		(*result->getTimePoints())[n].deviationValue = sqrt(sumAvg / repetitions);
 	}
 
+	bar->succeeded();
 	return result;
 }

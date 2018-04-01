@@ -2,6 +2,8 @@
 
 #include "SolutionCreator.h"
 #include "DBManager.h"
+#include "BackpackView.h"
+#include "qcustomplot.h"
 
 #include <QtCore\qvector.h>
 #include <QtWidgets\qwidget.h>
@@ -22,6 +24,7 @@ public:
 	QVector<BackpackProblem*> *getData() const;
 
 	void refreshTreeWidget();
+	void onTreeItemChanged(QTreeWidgetItem *item, int column);
 
 private:
 
@@ -32,8 +35,8 @@ private:
 	//Widgets
 	QTreeWidget *treeWidget;
 
-	QGraphicsView *backpackView;
-	QGraphicsView *plotView;
+	BackpackView *backpackView;
+	QCustomPlot *plotView;
 
 	QPushButton *setButton;
 	QPushButton *removeButton;

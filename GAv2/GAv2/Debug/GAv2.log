@@ -1,8 +1,3 @@
-﻿  DBManager.cpp
-  moc_MainWidget.cpp
-  MainWidget.cpp
-  SolutionCreator.cpp
-  main.cpp
-  Generating Code...
+﻿  BackpackProblem.cpp
   GAv2.vcxproj -> C:\Users\Harrel\Desktop\cpp\GAv2\Win32\Debug\GAv2.exe
   GAv2.vcxproj -> C:\Users\Harrel\Desktop\cpp\GAv2\Win32\Debug\GAv2.pdb (Full PDB)

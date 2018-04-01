@@ -1,5 +1,7 @@
 ﻿#include "ProgressWindow.h"
 
+#include <QtWidgets\qmessagebox.h>
+
 ProgressWindow::ProgressWindow(QWidget * parent) : QWidget(parent),
 	layout(new QGridLayout(this)),
 	repLabel(new QLabel("Repetition: ")), repValLabel(new QLabel), genLabel(new QLabel("Generation: ")), genValLabel(new QLabel),
@@ -25,6 +27,11 @@ ProgressWindow::ProgressWindow(QWidget * parent) : QWidget(parent),
 ProgressWindow::~ProgressWindow() 
 {
 	
+}
+
+void ProgressWindow::succeeded()
+{
+	QMessageBox::information(this, "Solution creator", "Solution created successfully!");
 }
 
 void ProgressWindow::setRepetition(int r)
