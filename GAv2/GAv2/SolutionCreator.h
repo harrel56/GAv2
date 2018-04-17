@@ -2,6 +2,8 @@
 #include "BackpackProblem.h"
 #include "GASolver.h"
 
+#include <QtConcurrent\qtconcurrentrun.h>
+#include <QtCore\qfuturewatcher.h>
 #include <QStackedWidget>
 #include <QtWidgets\qpushbutton.h>
 #include <QtWidgets\qlistwidget.h>
@@ -13,6 +15,7 @@
 #include <QtWidgets\qradiobutton.h>
 
 class MainWidget;
+class SolutionData;
 
 class SolutionPage : public QWidget
 {
@@ -27,7 +30,7 @@ public:
 
 signals:
 	void changeIndex(int);
-	void solveClicked(/*Solution sol*/);
+	void solveClicked();
 };
 
 class ProblemPage : public SolutionPage
@@ -45,6 +48,7 @@ public:
 private:
 	void onNextButtonClicked();
 	void onGenerateButtonClicked();
+	void onLoadButtonClicked();
 	QString getValidationError();
 
 	MainWidget *mainWidget;
@@ -72,6 +76,7 @@ private:
 	QLineEdit *valueMaxEdit;
 	QLineEdit *weightMaxEdit;
 	QPushButton *generateButton;
+	QPushButton *loadButton;
 
 	QPushButton *nextButton;
 
@@ -174,8 +179,6 @@ private:
 	QLabel *probLabel;
 	QLineEdit *probEdit;
 
-	//Test
-	QLabel *testLabel;
 
 };
 
@@ -195,12 +198,16 @@ protected:
 
 private:
 	void onSolveClicked();
+	void onSolutionCreated(SolutionData* data);
 
 	MainWidget *mainWidget;
 
 	ProblemPage *page1;
 	BasicPage *page2;
 	SelectionPage *page3;
+
+	QFuture<SolutionData*> futureResult;
+	QFutureWatcher<SolutionData*> futureWatcher;
 
 signals:
 	void onClose();

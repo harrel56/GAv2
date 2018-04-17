@@ -164,6 +164,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_BackpackView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="RouletteWheelSelection.cpp">
+      <Filter>Source Files\GA\GASolver\Selections</Filter>
+    </ClCompile>
+    <ClCompile Include="RankSelection.cpp">
+      <Filter>Source Files\GA\GASolver\Selections</Filter>
+    </ClCompile>
+    <ClCompile Include="StochasticUniformSelection.cpp">
+      <Filter>Source Files\GA\GASolver\Selections</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="gav2.qrc">
@@ -195,9 +204,6 @@
     <ClInclude Include="BackpackProblem.h">
       <Filter>Header Files\GA\Problem</Filter>
     </ClInclude>
-    <ClInclude Include="GASolver.h">
-      <Filter>Header Files\GA\GASolver</Filter>
-    </ClInclude>
     <ClInclude Include="Item.h">
       <Filter>Header Files\GA\Problem</Filter>
     </ClInclude>
@@ -220,6 +226,18 @@
       <Filter>Header Files\GA\GASolver</Filter>
     </ClInclude>
     <ClInclude Include="SolutionData.h">
+      <Filter>Header Files\GA\GASolver</Filter>
+    </ClInclude>
+    <ClInclude Include="RouletteWheelSelection.h">
+      <Filter>Header Files\GA\GASolver\Selections</Filter>
+    </ClInclude>
+    <ClInclude Include="RankSelection.h">
+      <Filter>Header Files\GA\GASolver\Selections</Filter>
+    </ClInclude>
+    <ClInclude Include="StochasticUniformSelection.h">
+      <Filter>Header Files\GA\GASolver\Selections</Filter>
+    </ClInclude>
+    <ClInclude Include="GASolver.h">
       <Filter>Header Files\GA\GASolver</Filter>
     </ClInclude>
   </ItemGroup>

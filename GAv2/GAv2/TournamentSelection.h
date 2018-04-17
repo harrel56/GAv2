@@ -5,6 +5,8 @@
 
 using namespace std;
 
+class GASolver;
+
 class TournamentSelection : public ISelection
 {
 public:
@@ -15,7 +17,7 @@ public:
 
 	void makeSelection(const vector<Individual>& pop, vector<Individual>& selected);
 	QVector<pair<QString, QString>> getParams();
-	QString getName();
+	const QString& getName();
 
 	~TournamentSelection();
 

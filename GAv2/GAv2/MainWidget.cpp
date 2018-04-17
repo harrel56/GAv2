@@ -4,10 +4,11 @@
 #include <iostream>
 #include <QtWidgets\qmessagebox.h>
 #include <QtWidgets\qheaderview.h>
+#include <QtWidgets\qcolordialog.h>
 
 MainWidget::MainWidget(QWidget *parent)
 	: QWidget(parent), treeWidget(new QTreeWidget()), backpackView(new BackpackView), plotView(new QCustomPlot),
-	setButton(new QPushButton("Set active")), removeButton(new QPushButton("Remove")), saveButton(new QPushButton("Save to file")), loadButton(new QPushButton("Load from file")), createButton(new QPushButton("Create new GA solution")),
+	clearButton(new QPushButton("Clear plot")), removeButton(new QPushButton("Remove")), createButton(new QPushButton("Create new GA solution")),
 	buttonsVLayout(new QVBoxLayout()), leftVLayout(new QVBoxLayout()), mainHLayout(new QHBoxLayout(this)),
 	solutionCreator(nullptr),
 	dbManager("QSQLITE")
@@ -19,6 +20,12 @@ MainWidget::MainWidget(QWidget *parent)
 	//plotView->setStyleSheet("border:none;");
 	//backpackView->setStyleSheet("border:none;");
 
+	connect(clearButton, &QPushButton::clicked, [&]()
+	{
+		refreshTreeWidget();
+		backpackView->clear();
+	});
+
 	connect(createButton, &QPushButton::clicked, [&]()
 	{
 		solutionCreator = new SolutionCreator;
@@ -28,10 +35,8 @@ MainWidget::MainWidget(QWidget *parent)
 		solutionCreator->show();
 	});
 
-	buttonsVLayout->addWidget(setButton);
+	buttonsVLayout->addWidget(clearButton);
 	buttonsVLayout->addWidget(removeButton);
-	buttonsVLayout->addWidget(saveButton);
-	buttonsVLayout->addWidget(loadButton);
 	buttonsVLayout->addWidget(createButton);
 
 	leftVLayout->addWidget(treeWidget);
@@ -62,7 +67,6 @@ MainWidget::MainWidget(QWidget *parent)
 	refreshTreeWidget();
 
 	plotView->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
-	//plotView->setInteractions(QCP::iSelectItems);
 	plotView->yAxis->setLabel("Fitness");
 	plotView->xAxis->setLabel("Generation");
 
@@ -79,7 +83,10 @@ QVector<BackpackProblem*> *MainWidget::getData() const { return this->data; }
 
 void MainWidget::refreshTreeWidget()
 {
-	plotView->clearGraphs();
+	plotView->clearPlottables();
+	plotView->legend->setVisible(false);
+	plotView->replot();
+	backpackView->clear();
 	treeWidget->clear();
 
 	for (BackpackProblem *bpp : *data)
@@ -112,7 +119,7 @@ void MainWidget::refreshTreeWidget()
 			plotItem->setText(0, "Plotting");
 			s1Item->addChild(plotItem);
 
-			TreeItemForPlot *bestItem = new TreeItemForPlot;
+			TreeItemForPlot *bestItem = new TreeItemForPlot(bpp->getName() + ":" + solution->getName().split(' ')[1] + ":Best");
 			bestItem->setText(0, "Best:");
 			bestItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
 			bestItem->setCheckState(1, Qt::Unchecked);
@@ -121,21 +128,21 @@ void MainWidget::refreshTreeWidget()
 			bestItem->setIndividuals(solution->getBestIndividuals());
 			plotItem->addChild(bestItem);
 
-			TreeItemForPlot *avgItem = new TreeItemForPlot;
+			TreeItemForPlot *avgItem = new TreeItemForPlot(bpp->getName() + ":" + solution->getName().split(' ')[1] + ":Average");
 			avgItem->setText(0, "Average:");
 			avgItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
 			avgItem->setCheckState(1, Qt::Unchecked);
 			avgItem->setData(solution->getAverageData());
 			plotItem->addChild(avgItem);
 
-			TreeItemForPlot *worstItem = new TreeItemForPlot;
+			TreeItemForPlot *worstItem = new TreeItemForPlot(bpp->getName() + ":" + solution->getName().split(' ')[1] + ":Worst");
 			worstItem->setText(0, "Worst:");
 			worstItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
 			worstItem->setCheckState(1, Qt::Unchecked);
 			worstItem->setData(solution->getWorstData());
 			plotItem->addChild(worstItem);
 
-			TreeItemForPlot *devItem = new TreeItemForPlot;
+			TreeItemForPlot *devItem = new TreeItemForPlot(bpp->getName() + ":" + solution->getName().split(' ')[1] + ":Deviation");
 			devItem->setText(0, "Deviation:");
 			devItem->setFlags(plotItem->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
 			devItem->setCheckState(1, Qt::Unchecked);
@@ -199,39 +206,69 @@ void MainWidget::refreshTreeWidget()
 void MainWidget::onTreeItemChanged(QTreeWidgetItem *item, int column)
 {
 	auto plotItem = dynamic_cast<TreeItemForPlot*>(item);
-	if (item->checkState(column) == Qt::Checked)
+	if (plotItem->hasCheckStateChanged())
 	{
-		QVector<double> keys(plotItem->getData().size());
-		for (int i = 0; i < keys.size(); ++i)
+		plotItem->setStateUnchanged();
+		if (plotItem->checkState(column) == Qt::Checked)
 		{
-			keys[i] = i;
-		}
-		plotItem->setGraph(plotView->addGraph());
-		plotItem->getGraph()->setData(keys, plotItem->getData(), true);
-		plotItem->getGraph()->setName(plotItem->text(0).left(plotItem->text(0).size() - 1));
-
-		if (plotItem->text(0) == "Best:")
-		{
-			plotItem->getGraph()->setSelectable(QCP::stSingleData);
-			plotItem->getGraph()->setScatterStyle(QCPScatterStyle::ssCircle);
-			std::cout << plotItem->getIndividuals().size() << std::endl;
-			connect(plotItem->getGraph(), static_cast<void (QCPAbstractPlottable::*)(const QCPDataSelection&)>(&QCPAbstractPlottable::selectionChanged), [=](const QCPDataSelection& data)
+			QColor color = QColorDialog::getColor(Qt::blue, this);
+			if (color.isValid())
 			{
-				bool *individual = plotItem->getIndividuals().at(data.dataRange().begin());
-				backpackView->draw(plotItem->getProblem(), individual);
-			});
+				QVector<double> keys(plotItem->getData().size());
+				for (int i = 0; i < keys.size(); ++i)
+				{
+					keys[i] = i;
+				}
+				plotItem->setGraph(plotView->addGraph());
+				plotItem->getGraph()->setData(keys, plotItem->getData(), true);
+				plotItem->getGraph()->setName(plotItem->getFullName());
+				plotItem->getGraph()->setPen(QPen(color));
+				plotItem->setBackgroundColor(1, color);
+
+				if (plotItem->text(0) == "Best:")
+				{
+					plotItem->getGraph()->setSelectable(QCP::stSingleData);
+					plotItem->getGraph()->setScatterStyle(QCPScatterStyle::ssCircle);
+					std::cout << plotItem->getIndividuals().size() << std::endl;
+					connect(plotItem->getGraph(), static_cast<void (QCPAbstractPlottable::*)(const QCPDataSelection&)>(&QCPAbstractPlottable::selectionChanged), [=](const QCPDataSelection& data)
+					{
+						if (data.dataRangeCount() > 0)
+						{
+							bool *individual = plotItem->getIndividuals().at(data.dataRange().begin());
+							backpackView->draw(plotItem->getProblem(), individual);
+						}
+						else
+						{
+							backpackView->clear();
+						}
+					});
+				}
+			}
+			else
+			{
+				plotItem->setCheckState(1, Qt::Unchecked);
+				plotItem->setStateUnchanged();
+				return;
+			}
 		}
-	}
-	else
-	{
-		plotView->removeGraph(plotItem->getGraph());
-	}
+		else if (plotItem->getGraph() != nullptr)
+		{
+			plotView->removeGraph(plotItem->getGraph());
+			plotItem->setGraph(nullptr);
+			plotItem->setBackgroundColor(1, Qt::white);
+		}
+		else
+		{
+			return;
+		}
 
-	if (plotView->graphCount() == 0)
-		plotView->legend->setVisible(false);
-	else
-		plotView->legend->setVisible(true);
 
-	plotView->rescaleAxes();
-	plotView->replot();
+		if (plotView->graphCount() == 0)
+			plotView->legend->setVisible(false);
+		else
+			plotView->legend->setVisible(true);
+
+		plotView->rescaleAxes();
+		plotView->replot();
+	}
 }

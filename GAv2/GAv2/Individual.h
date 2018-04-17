@@ -2,10 +2,12 @@
 
 #include "Solution.h"
 
+class GASolver;
+
 class Individual : public Solution
 {
 public:
-	Individual(BackpackProblem *bpp);
+	Individual(BackpackProblem *bpp, GASolver *solver);
 	Individual(Individual&& ind);
 	Individual(const Individual& ind);
 
@@ -13,19 +15,15 @@ public:
 	void mutate(double chance);
 	int getTotalValue() const;
 
-	Individual& operator=(const Individual& ind);
+	const Individual& operator=(const Individual& ind);
+	const Individual& operator=(Individual&& ind);
 
-	static void setPenaltyParams(double fixed, double param, double penaltyPower);
-
-	static vector<Individual> initializePop(int size, BackpackProblem *bpp);
+	static vector<Individual> initializePop(int size, BackpackProblem *bpp, GASolver *solver);
 	static const Individual *getBestIndividual(const vector<Individual>& pop);
 	static const Individual *getWorstIndividual(const vector<Individual>& pop);
 	static const double getAverageValue(const vector<Individual>& pop);
 
 private:
-
-	static double fixedPenalty;
-	static double progressParam;
-	static double progressPower;
+	GASolver *solver;
 
 };

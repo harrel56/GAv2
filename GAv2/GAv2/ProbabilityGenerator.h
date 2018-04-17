@@ -7,18 +7,16 @@ using namespace std;
 class ProbabilityGenerator
 {
 public:
+	ProbabilityGenerator();
 	ProbabilityGenerator(const ProbabilityGenerator&) = delete;
 	ProbabilityGenerator(ProbabilityGenerator&&) = delete;
 	void operator=(const ProbabilityGenerator&) = delete;
 
-	static ProbabilityGenerator& getInstance();
-
-	double operator()();
+	double nextProbability() const;
 
 private:
-	ProbabilityGenerator();
 
 	random_device rd;
-	default_random_engine rng;
+	mutable default_random_engine rng;
 	uniform_real_distribution<double> rand;
 };

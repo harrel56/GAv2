@@ -1,6 +1,5 @@
 #include "GASolver.h"
 #include "Individual.h"
-#include "ProbabilityGenerator.h"
 #include "TournamentSelection.h"
 
 #include <iomanip>
@@ -8,28 +7,27 @@
 #include <random>
 #include <algorithm>
 #include <math.h>
-#include <QtCore\qcoreapplication.h>
+#include <QtCore\qmetaobject.h>
 
 using namespace std;
 
 GASolver::GASolver(int popSize, int generationCount, double mutationChance, double crossChance, int crossPoints, int repetitions, double funParam1, double funParam2, double funParam3) :
-	popSize(popSize), generationCount(generationCount), mutationChance(mutationChance), crossChance(crossChance), crossPoints(crossPoints), repetitions(repetitions), cancelled(false),
-	funParam1(funParam1), funParam2(funParam2), funParam3(funParam3)
+	popSize(popSize), generationCount(generationCount), mutationChance(mutationChance), crossChance(crossChance), crossPoints(crossPoints), repetitions(repetitions),
+	fixedPenalty(funParam1), progressParam(funParam2), progressPower(funParam3)
 {
 
 }
 
 void GASolver::setSelection(ISelection *selection) { this->selection = selection; }
 
-void GASolver::setCancelled(bool state)
+const ProbabilityGenerator & GASolver::getGenerator()
 {
-	this->cancelled = state;
+	return generator;
 }
 
 bool *GASolver::copyArray(bool *data, int size)
 {
 	bool *result = new bool[size];
-	//std::copy(data, data + size, result);
 	for (int i = 0; i < size; ++i)
 	{
 		result[i] = data[i];
@@ -39,15 +37,13 @@ bool *GASolver::copyArray(bool *data, int size)
 
 SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 {
+	selection->setSolver(this);
+
 	//Initialize 2 sets of individuals to avoid further individual object creations
-	Individual::setPenaltyParams(funParam1, funParam2, funParam3);
-	auto population = Individual::initializePop(popSize, bpp);
-	auto selectedPopulation = Individual::initializePop(popSize, bpp);
+	auto population = Individual::initializePop(popSize, bpp, this);
+	auto selectedPopulation = Individual::initializePop(popSize, bpp, this);
 
-	//Get custom RNG
-	ProbabilityGenerator& rand = ProbabilityGenerator::getInstance();
-
-	SolutionData *result = new SolutionData(selection, popSize, generationCount, mutationChance, crossChance, crossPoints, repetitions, funParam1, funParam2, funParam3);
+	SolutionData *result = new SolutionData(selection, popSize, generationCount, mutationChance, crossChance, crossPoints, repetitions, fixedPenalty, progressParam, progressPower);
 	QVector<QVector<TimePoint>> timePointsData(repetitions);
 
 	bar->setMaxValue(generationCount * repetitions);
@@ -70,7 +66,7 @@ SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 			//Do the crossovers - selectedPop is in a random order so we can just iterate through it
 			for (unsigned int i = 0; i < selectedPopulation.size() - 1; i += 2)
 			{
-				if (i + 1 < selectedPopulation.size() && rand() < crossChance)
+				if (i + 1 < selectedPopulation.size() && generator.nextProbability() < crossChance)
 					selectedPopulation[i].crossover(selectedPopulation[i + 1], crossPoints);
 			}
 
@@ -81,21 +77,16 @@ SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 			//Swap containers for next iteration (selectedPop will be overwritten)
 			selectedPopulation.swap(population);
 
-			if (n % 20 == 0)
+			//Update GUI thread through meta object call and check if user has cancelled this action
+			QMetaObject::invokeMethod(bar, "update", Q_ARG(int, r), Q_ARG(int, n), Q_ARG(int, r * generationCount + n));
+			if (bar->isCancelled())
 			{
-				bar->setRepetition(r);
-				bar->setGeneration(n);
-				bar->setValue(r * generationCount + n);
-				QCoreApplication::processEvents(QEventLoop::AllEvents, 10000);
+				QMetaObject::invokeMethod(bar, "failed");
+				return nullptr;
 			}
 		}
-
-		if (cancelled)
-		{
-			cancelled = false;
-			return nullptr;
-		}
 	}
+	QMetaObject::invokeMethod(bar, "update", Q_ARG(int, repetitions - 1), Q_ARG(int, generationCount), Q_ARG(int, repetitions * generationCount));
 
 	//Fill the result
 	for (int n = 0; n < generationCount; ++n)
@@ -129,7 +120,7 @@ SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 
 		(*result->getTimePoints())[n].bestValue = sumBest / repetitions;
 		(*result->getTimePoints())[n].worstValue = sumWorst / repetitions;
-		(*result->getTimePoints())[n].bestData = copyArray(bestData, bpp->getItems().size());
+		(*result->getTimePoints())[n].bestData = copyArray(timePointsData[0][n].bestData, bpp->getItems().size());
 		(*result->getTimePoints())[n].worstData = copyArray(worstData, bpp->getItems().size());
 		double avgAvg = sumAvg / repetitions;
 		(*result->getTimePoints())[n].avgValue = avgAvg;
@@ -143,6 +134,6 @@ SolutionData *GASolver::solve(BackpackProblem *bpp, ProgressWindow *bar)
 		(*result->getTimePoints())[n].deviationValue = sqrt(sumAvg / repetitions);
 	}
 
-	bar->succeeded();
+	QMetaObject::invokeMethod(bar, "succeeded");
 	return result;
 }

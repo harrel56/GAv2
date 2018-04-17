@@ -1,5 +1,6 @@
 #include "TournamentSelection.h"
 #include "ProbabilityGenerator.h"
+#include <GASolver.h>
 
 #include <algorithm>
 #include <math.h>
@@ -8,7 +9,7 @@ using namespace std;
 
 const QString TournamentSelection::NAME = "Tournament selection";
 
-TournamentSelection::TournamentSelection(int s, double prob) : size(s) 
+TournamentSelection::TournamentSelection(int s, double prob) : size(s)
 {
 	probabilities = new double[size];
 	for (int i = 0; i < size - 1; i++)
@@ -20,8 +21,7 @@ TournamentSelection::TournamentSelection(int s, double prob) : size(s)
 
 void TournamentSelection::makeSelection(const vector<Individual>& pop, vector<Individual>& selected)
 {
-	//Init 2 RNGs
-	ProbabilityGenerator& probRand = ProbabilityGenerator::getInstance();
+	//Init RNG
 	random_device rd;
 	default_random_engine rng(rd());
 	uniform_int_distribution<int> rand(0, pop.size() - 1);
@@ -44,7 +44,7 @@ void TournamentSelection::makeSelection(const vector<Individual>& pop, vector<In
 		});
 
 		//Determine winner and add him to selected vector
-		double prob = probRand();
+		double prob = solver->getGenerator().nextProbability();
 		for (int j = 0; j < size; j++)
 		{
 			if (prob < probabilities[j])
@@ -61,9 +61,9 @@ QVector<pair<QString, QString>> TournamentSelection::getParams()
 	return result;
 }
 
-QString TournamentSelection::getName()
+const QString & TournamentSelection::getName()
 {
-	return NAME;
+	return TournamentSelection::NAME;
 }
 
 TournamentSelection::~TournamentSelection() { delete probabilities; }

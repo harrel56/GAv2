@@ -2,10 +2,14 @@
 #include "MainWidget.h"
 #include "ProgressWindow.h"
 #include "TournamentSelection.h"
+#include "RouletteWheelSelection.h"
+#include "RankSelection.h"
+#include "StochasticUniformSelection.h"
 #include "GASolver.h"
 
 #include <QtWidgets\qmessagebox.h>
 #include <QtConcurrent\qtconcurrentrun.h>
+#include <QtCore\qstringlist.h>
 #include <iostream>
 
 SolutionPage::SolutionPage(QWidget * parent) : QWidget(parent) {}
@@ -24,10 +28,12 @@ ProblemPage::ProblemPage(QWidget * parent)
 	problemBox(new QGroupBox("Problem")), generateBox(new QGroupBox("Generate")),
 	problemList(new QTreeWidget),
 	nameLabel(new QLabel("Name")), capacityLabel(new QLabel("Capacity")), countLabel(new QLabel("Item count")), valueMaxLabel(new QLabel("Max. value")), weightMaxLabel(new QLabel("Max. weight")),
-	nameEdit(new QLineEdit), capacityEdit(new QLineEdit), countEdit(new QLineEdit), valueMaxEdit(new QLineEdit), weightMaxEdit(new QLineEdit), generateButton(new QPushButton("Generate")), nextButton(new QPushButton("Next")),
+	nameEdit(new QLineEdit), capacityEdit(new QLineEdit), countEdit(new QLineEdit), valueMaxEdit(new QLineEdit), weightMaxEdit(new QLineEdit),
+	loadButton(new QPushButton("Load from CSV")), generateButton(new QPushButton("Generate")), nextButton(new QPushButton("Next")),
 	mainGridLayout(new QGridLayout(this)), problemVLayout(new QVBoxLayout), generateFormLayout(new QFormLayout), generateVLayout(new QVBoxLayout)
 {
 	problemVLayout->addWidget(problemList);
+	problemVLayout->addWidget(loadButton);
 	problemBox->setLayout(problemVLayout);
 
 	generateFormLayout->addRow(nameLabel, nameEdit);
@@ -50,6 +56,7 @@ ProblemPage::ProblemPage(QWidget * parent)
 
 	connect(nextButton, &QPushButton::clicked, this, &ProblemPage::onNextButtonClicked);
 	connect(generateButton, &QPushButton::clicked, this, &ProblemPage::onGenerateButtonClicked);
+	connect(loadButton, &QPushButton::clicked, this, &ProblemPage::onLoadButtonClicked);
 
 	problemList->setHeaderLabels({ "Name", "Value" });
 	problemList->setColumnCount(2);
@@ -129,6 +136,64 @@ void ProblemPage::onGenerateButtonClicked()
 	else
 	{
 		QMessageBox::warning(this, "Validation error!", errMsg);
+	}
+}
+
+void ProblemPage::onLoadButtonClicked()
+{
+	QFile file(QFileDialog::getOpenFileName(this, "Open file", QString(), "CSV files (*.csv)"));
+	QString errMsg;
+	if (file.open(QIODevice::ReadOnly))
+	{
+		bool ok;
+		QString name = file.readLine().split('\n').first();
+		if (name.size() < 3 || name.size() > 20)
+		{
+			errMsg = "First row of file should contain name of the problem! (3-20 letters)";
+		}
+		int capacity = QString(file.readLine().split('\n').first()).toInt(&ok);
+		if (!ok || capacity <= 1)
+		{
+			errMsg = "Second row of file should contain the backpack capacity!";
+		}
+
+		QVector<Item> items;
+		QString line = file.readLine();
+		while (errMsg.isEmpty() && !line.isEmpty()) 
+		{
+			QStringList temp = line.split('\n').first().split(',');
+
+			int value = temp.first().toInt(&ok);
+			if(!ok || value <= 0)
+				errMsg = "Incorrect items format!";
+			int weight = temp.last().toInt(&ok);
+			if (!ok || weight <= 0)
+				errMsg = "Incorrect items format!";
+
+			if (errMsg.isEmpty())
+			{
+				items.append(Item(weight, value));
+				line = file.readLine();
+			}
+		}
+
+		if (errMsg.isEmpty())
+		{
+			data->append(new BackpackProblem(-1, name, capacity, std::move(items), QVector<SolutionData*>()));
+			mainWidget->getDBManager().insertProblem(data->back());
+			qSort(data->begin(), data->end(), [](BackpackProblem *bpp1, BackpackProblem *bpp2) { return bpp1->getName() < bpp2->getName(); });
+			QMessageBox::information(this, "Problem loaded", "Problem loaded from file successfully!");
+			refreshData(data);
+			mainWidget->refreshTreeWidget();
+		}
+		else
+		{
+			QMessageBox::warning(this, "File parsing error", errMsg);
+		}
+	}
+	else
+	{
+		QMessageBox::warning(this, "File opening error", "Selected file could not be opened!");
 	}
 }
 
@@ -277,7 +342,6 @@ SelectionPage::SelectionPage(QWidget * parent)
 	previousButton(new QPushButton("Back")), finishButton(new QPushButton("Solve")),
 	stackedWidget(new QStackedWidget),
 	formLayout(new QFormLayout), sizeLabel(new QLabel("Size")), sizeEdit(new QLineEdit), probLabel(new QLabel("Pobability")), probEdit(new QLineEdit),
-	testLabel(new QLabel("ELOASLODALSODALO")),
 	paramFormLayout(new QFormLayout), innerHLayout(new QHBoxLayout), buttonHLayout(new QHBoxLayout), mainGridLayout(new QGridLayout(this))
 {
 
@@ -299,13 +363,17 @@ SelectionPage::SelectionPage(QWidget * parent)
 	formLayout->addRow(probLabel, probEdit);
 	QWidget *wrapper1 = new QWidget;
 	wrapper1->setLayout(formLayout);
+	stackedWidget->addWidget(new QWidget);
+	stackedWidget->addWidget(new QWidget);
+	stackedWidget->addWidget(new QWidget);
 	stackedWidget->addWidget(wrapper1);
-	stackedWidget->addWidget(testLabel);
 	stackedWidget->addWidget(new QWidget);
 	stackedWidget->setCurrentIndex(stackedWidget->count() - 1);
 
+	QListWidgetItem *rankItem = new QListWidgetItem(RankSelection::NAME, methodList);
+	QListWidgetItem *RWItem = new QListWidgetItem(RouletteWheelSelection::NAME, methodList);
+	QListWidgetItem *stochasticItem = new QListWidgetItem(StochasticUniformSelection::NAME, methodList);
 	QListWidgetItem *tournamentItem = new QListWidgetItem(TournamentSelection::NAME, methodList);
-	QListWidgetItem *tournamentItem2 = new QListWidgetItem("TEST", methodList);
 	connect(methodList, &QListWidget::itemSelectionChanged, this, &SelectionPage::onListSelectionChange);
 
 	connect(finishButton, &QPushButton::clicked, this, &SelectionPage::onSolveButtonClicked);
@@ -334,15 +402,24 @@ void SelectionPage::onSolveButtonClicked()
 		switch (methodList->currentRow())
 		{
 		case 0:
+			selectedSelection = new RankSelection;
+			emit solveClicked();
+			break;
+		case 1:
+			selectedSelection = new RouletteWheelSelection;
+			emit solveClicked();
+			break;
+		case 2:
+			selectedSelection = new StochasticUniformSelection;
+			emit solveClicked();
+			break;
+		case 3:
 			errMsg = getTournamentValidationError();
 			if (errMsg.isEmpty())
 			{
 				selectedSelection = new TournamentSelection(sizeEdit->text().toInt(), probEdit->text().replace(',', '.').toDouble());
 				emit solveClicked();
 			}
-			break;
-		case 1:
-			errMsg = getTestValidationError();
 			break;
 		default:
 			break;
@@ -392,6 +469,7 @@ SolutionCreator::SolutionCreator(QWidget * parent) : QStackedWidget(parent), pag
 	connect(page2, SIGNAL(changeIndex(int)), this, SLOT(setCurrentIndex(int)));
 	connect(page3, SIGNAL(changeIndex(int)), this, SLOT(setCurrentIndex(int)));
 	connect(page3, &SelectionPage::solveClicked, this, &SolutionCreator::onSolveClicked);
+	connect(&futureWatcher, &QFutureWatcher<SolutionData*>::finished, [&]() { onSolutionCreated(futureWatcher.result()); });
 }
 
 SolutionCreator::~SolutionCreator() {
@@ -422,25 +500,25 @@ void SolutionCreator::onSolveClicked()
 	GASolver *solver = page2->getSelectedSolver();
 	solver->setSelection(page3->getSelectedSelection());
 	BackpackProblem *problem = page1->getSelectedProblem();
-	ProgressWindow *bar = new ProgressWindow;
-	connect(bar, &ProgressWindow::cancel, [&]() {solver->setCancelled(true); });
 	this->setWindowModality(Qt::NonModal);
+
+	//Need to be created on GUI thread
+	ProgressWindow *bar = new ProgressWindow();
 	bar->show();
-	//QtConcurrent::run(&GASolver::solve, page1->getSelectedProblem(), bar);
-	SolutionData *result = solver->solve(problem, bar);
-	bar->hide();
+	
+	futureResult = QtConcurrent::run([=]() {return solver->solve(problem, bar); });
+	futureWatcher.setFuture(futureResult);
+}
+
+void SolutionCreator::onSolutionCreated(SolutionData *data)
+{
 	this->setWindowModality(Qt::ApplicationModal);
-	if (result == nullptr)
+	if (data != nullptr)
 	{
-		
-	}
-	else
-	{
-		result->setName("Solution " + QString::number(problem->getSolutions().size() + 1));
-		problem->addSolution(result);
-		mainWidget->getDBManager().insertSolution(problem->getId(), problem->getItems().size(), result);
+		data->setName("Solution " + QString::number(page1->getSelectedProblem()->getSolutions().size() + 1));
+		page1->getSelectedProblem()->addSolution(data);
+		mainWidget->getDBManager().insertSolution(page1->getSelectedProblem()->getId(), page1->getSelectedProblem()->getItems().size(), data);
 		mainWidget->refreshTreeWidget();
 		page1->refreshData(mainWidget->getData());
-
 	}
 }

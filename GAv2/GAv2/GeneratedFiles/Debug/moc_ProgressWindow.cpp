@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_ProgressWindow_t {
-    QByteArrayData data[3];
-    char stringdata0[23];
+    QByteArrayData data[11];
+    char stringdata0[75];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -31,10 +31,20 @@ static const qt_meta_stringdata_ProgressWindow_t qt_meta_stringdata_ProgressWind
     {
 QT_MOC_LITERAL(0, 0, 14), // "ProgressWindow"
 QT_MOC_LITERAL(1, 15, 6), // "cancel"
-QT_MOC_LITERAL(2, 22, 0) // ""
+QT_MOC_LITERAL(2, 22, 0), // ""
+QT_MOC_LITERAL(3, 23, 11), // "setMaxValue"
+QT_MOC_LITERAL(4, 35, 3), // "max"
+QT_MOC_LITERAL(5, 39, 6), // "update"
+QT_MOC_LITERAL(6, 46, 3), // "rep"
+QT_MOC_LITERAL(7, 50, 3), // "gen"
+QT_MOC_LITERAL(8, 54, 3), // "val"
+QT_MOC_LITERAL(9, 58, 9), // "succeeded"
+QT_MOC_LITERAL(10, 68, 6) // "failed"
 
     },
-    "ProgressWindow\0cancel\0"
+    "ProgressWindow\0cancel\0\0setMaxValue\0"
+    "max\0update\0rep\0gen\0val\0succeeded\0"
+    "failed"
 };
 #undef QT_MOC_LITERAL
 
@@ -44,7 +54,7 @@ static const uint qt_meta_data_ProgressWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       1,   14, // methods
+       5,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -52,9 +62,21 @@ static const uint qt_meta_data_ProgressWindow[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,   19,    2, 0x06 /* Public */,
+       1,    0,   39,    2, 0x06 /* Public */,
+
+ // slots: name, argc, parameters, tag, flags
+       3,    1,   40,    2, 0x0a /* Public */,
+       5,    3,   43,    2, 0x0a /* Public */,
+       9,    0,   50,    2, 0x0a /* Public */,
+      10,    0,   51,    2, 0x0a /* Public */,
 
  // signals: parameters
+    QMetaType::Void,
+
+ // slots: parameters
+    QMetaType::Void, QMetaType::Int,    4,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,    6,    7,    8,
+    QMetaType::Void,
     QMetaType::Void,
 
        0        // eod
@@ -67,6 +89,10 @@ void ProgressWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->cancel(); break;
+        case 1: _t->setMaxValue((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 2: _t->update((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
+        case 3: _t->succeeded(); break;
+        case 4: _t->failed(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -80,11 +106,10 @@ void ProgressWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObject ProgressWindow::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_ProgressWindow.data,
+    { &QDialog::staticMetaObject, qt_meta_stringdata_ProgressWindow.data,
       qt_meta_data_ProgressWindow,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
@@ -99,22 +124,22 @@ void *ProgressWindow::qt_metacast(const char *_clname)
     if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_ProgressWindow.stringdata0))
         return static_cast<void*>(const_cast< ProgressWindow*>(this));
-    return QWidget::qt_metacast(_clname);
+    return QDialog::qt_metacast(_clname);
 }
 
 int ProgressWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = QWidget::qt_metacall(_c, _id, _a);
+    _id = QDialog::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
+        _id -= 5;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 1)
+        if (_id < 5)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 1;
+        _id -= 5;
     }
     return _id;
 }

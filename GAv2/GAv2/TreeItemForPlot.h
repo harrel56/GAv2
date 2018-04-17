@@ -11,9 +11,12 @@ class TreeItemForPlot : public QTreeWidgetItem
 {
 
 public:
-	TreeItemForPlot();
+	TreeItemForPlot(const QString& fullName);
 	~TreeItemForPlot();
 
+	bool hasCheckStateChanged();
+	void setStateUnchanged();
+	const QString& getFullName();
 	BackpackProblem *getProblem();
 	void setProblem(BackpackProblem *bpp);
 	QCPGraph *getGraph();
@@ -25,6 +28,8 @@ public:
 
 private:
 
+	bool internalState;
+	QString fullName;
 	BackpackProblem *bpp;
 	QCPGraph *graph;
 	QVector<double> data;

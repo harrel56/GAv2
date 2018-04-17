@@ -2,13 +2,7 @@
 
 ProbabilityGenerator::ProbabilityGenerator() : rng(rd()) {}
 
-ProbabilityGenerator& ProbabilityGenerator::getInstance()
-{
-	static ProbabilityGenerator rand;
-	return rand;
-}
-
-double ProbabilityGenerator::operator()()
+double ProbabilityGenerator::nextProbability() const
 {
 	return rand(rng);
 }

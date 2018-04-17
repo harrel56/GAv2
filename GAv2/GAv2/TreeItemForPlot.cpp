@@ -1,6 +1,6 @@
 #include "TreeItemForPlot.h"
 
-TreeItemForPlot::TreeItemForPlot()
+TreeItemForPlot::TreeItemForPlot(const QString& fullName) : fullName(fullName), internalState(false), graph(nullptr)
 {
 
 }
@@ -8,6 +8,24 @@ TreeItemForPlot::TreeItemForPlot()
 TreeItemForPlot::~TreeItemForPlot()
 {
 
+}
+
+bool TreeItemForPlot::hasCheckStateChanged()
+{
+	return checkState(1) == Qt::Checked ? !internalState : internalState;
+}
+
+void TreeItemForPlot::setStateUnchanged()
+{
+	if (checkState(1) == Qt::Checked)
+		internalState = true;
+	else
+		internalState = false;
+}
+
+const QString & TreeItemForPlot::getFullName()
+{
+	return fullName;
 }
 
 BackpackProblem * TreeItemForPlot::getProblem()

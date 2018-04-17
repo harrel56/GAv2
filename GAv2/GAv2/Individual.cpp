@@ -1,5 +1,6 @@
 #include "Individual.h"
 #include "ProbabilityGenerator.h"
+#include "GASolver.h"
 
 #include <iostream>
 #include <conio.h>
@@ -9,23 +10,18 @@
 
 using namespace std;
 
-double Individual::fixedPenalty;
-double Individual::progressParam;
-double Individual::progressPower;
-
-Individual::Individual(BackpackProblem *bpp) : Solution(bpp)
+Individual::Individual(BackpackProblem *bpp, GASolver *solver) : Solution(bpp), solver(solver)
 {
-	ProbabilityGenerator& rand = ProbabilityGenerator::getInstance();
 	for (int i = 0; i < size; i++)
 	{
-		if (rand() > 0.5)
+		if (solver->getGenerator().nextProbability() > 0.5)
 			data[i] = true;
 	}
 }
 
-Individual::Individual(Individual&& ind) : Solution(move(ind)) {}
+Individual::Individual(Individual&& ind) : Solution(move(ind)), solver(ind.solver) {}
 
-Individual::Individual(const Individual& ind) : Solution(ind) {}
+Individual::Individual(const Individual& ind) : Solution(ind), solver(ind.solver) {}
 
 void Individual::crossover(Individual& partner, int pts)
 {
@@ -56,15 +52,6 @@ void Individual::crossover(Individual& partner, int pts)
 		} while (!unique);
 	}
 
-	//cout << "Crosspoints: ";
-	//for (int i = 0; i < pts; i++)
-	//	cout << points[i] << ", ";
-	//cout << endl << endl << "Parents: " << endl;
-	//for (int i = 0; i < size; i++)
-	//	cout << data[i];
-	//cout << endl;
-	//for (int i = 0; i < size; i++)
-	//	cout << partner.data[i];
 	//Change data in each individual based on cross points
 	bool inverted = false;
 	for (int i = 0; i < size; i++)
@@ -79,22 +66,13 @@ void Individual::crossover(Individual& partner, int pts)
 	}
 
 	delete points;
-	//cout << endl << "Children: " << endl;
-	//for (int i = 0; i < size; i++)
-	//	cout << data[i];
-	//cout << endl;
-	//for (int i = 0; i < size; i++)
-	//	cout << partner.data[i];
-	//cout << endl << endl;
-	//_getch();
 }
 
 void Individual::mutate(double chance)
 {
-	ProbabilityGenerator& rand = ProbabilityGenerator::getInstance();
 	for (int i = 0; i < size; i++)
 	{
-		if (rand() < chance)
+		if (solver->getGenerator().nextProbability() < chance)
 			data[i] = !data[i];
 	}
 }
@@ -103,13 +81,13 @@ int Individual::getTotalValue() const
 {
 	int value = Solution::getTotalValue();
 	int weight = Solution::getTotalWeight();
-	if (problem->getBackpackCapacity() > weight)
+	if (problem->getBackpackCapacity() >= weight)
 		return value;
 	else
-		return value - (value * Individual::fixedPenalty - Individual::progressParam * std::pow(problem->getBackpackCapacity() - weight, Individual::progressPower));
+		return value - (value * solver->fixedPenalty - solver->progressParam * std::pow(problem->getBackpackCapacity() - weight, solver->progressPower));
 }
 
-Individual& Individual::operator=(const Individual& ind)
+const Individual& Individual::operator=(const Individual& ind)
 {
 	if (this != &ind)
 	{
@@ -126,21 +104,25 @@ Individual& Individual::operator=(const Individual& ind)
 	return *this;
 }
 
-void Individual::setPenaltyParams(double fixed, double param, double penaltyPower)
+const Individual & Individual::operator=(Individual && ind)
 {
-	Individual::fixedPenalty = fixed;
-	Individual::progressParam = param;
-	Individual::progressPower = penaltyPower;
+	if (this->data != nullptr)
+		delete this->data;
+
+	this->data = ind.data;
+	ind.data = nullptr;
+
+	return *this;
 }
 
-vector<Individual> Individual::initializePop(int size, BackpackProblem *bpp)
+vector<Individual> Individual::initializePop(int size, BackpackProblem *bpp, GASolver *solver)
 {
 	vector<Individual> result;
 	result.reserve(size);
 
 	for (int i = 0; i < size; i++)
 	{
-		result.push_back(Individual(bpp));
+		result.push_back(Individual(bpp, solver));
 	}
 
 	return result;

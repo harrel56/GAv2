@@ -38,10 +38,8 @@ private:
 	BackpackView *backpackView;
 	QCustomPlot *plotView;
 
-	QPushButton *setButton;
+	QPushButton *clearButton;
 	QPushButton *removeButton;
-	QPushButton *saveButton;
-	QPushButton *loadButton;
 	QPushButton *createButton;
 
 	//Layouts

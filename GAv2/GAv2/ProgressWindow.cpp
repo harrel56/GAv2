@@ -2,10 +2,11 @@
 
 #include <QtWidgets\qmessagebox.h>
 
-ProgressWindow::ProgressWindow(QWidget * parent) : QWidget(parent),
+ProgressWindow::ProgressWindow(QWidget * parent) : QDialog(parent),
 	layout(new QGridLayout(this)),
 	repLabel(new QLabel("Repetition: ")), repValLabel(new QLabel), genLabel(new QLabel("Generation: ")), genValLabel(new QLabel),
-	bar(new QProgressBar), cancelButton(new QPushButton("Cancel"))
+	bar(new QProgressBar), cancelButton(new QPushButton("Cancel")),
+	cancelled(false)
 {
 	this->setWindowTitle("Genetic algorithm progress");
 	this->setWindowFlags(Qt::WindowTitleHint | Qt::WindowStaysOnTopHint | Qt::MSWindowsFixedSizeDialogHint);
@@ -21,7 +22,7 @@ ProgressWindow::ProgressWindow(QWidget * parent) : QWidget(parent),
 	layout->addWidget(bar, 1, 0, 1, 4);
 	layout->addWidget(cancelButton, 2, 2, 1, 2);
 
-	connect(cancelButton, &QPushButton::clicked, [&]() {emit cancel(); });
+	connect(cancelButton, &QPushButton::clicked, [&]() {cancelled = true; });
 }
 
 ProgressWindow::~ProgressWindow() 
@@ -32,6 +33,15 @@ ProgressWindow::~ProgressWindow()
 void ProgressWindow::succeeded()
 {
 	QMessageBox::information(this, "Solution creator", "Solution created successfully!");
+	this->hide();
+	delete this;
+}
+
+void ProgressWindow::failed()
+{
+	QMessageBox::warning(this, "Solution creation", "Solution creation has been cancelled!");
+	this->hide();
+	delete this;
 }
 
 void ProgressWindow::setRepetition(int r)
@@ -52,4 +62,16 @@ void ProgressWindow::setMaxValue(int max)
 void ProgressWindow::setValue(int val)
 {
 	bar->setValue(val);
+}
+
+bool ProgressWindow::isCancelled()
+{
+	return cancelled;
+}
+
+void ProgressWindow::update(int rep, int gen, int val)
+{
+	setRepetition(rep);
+	setGeneration(gen);
+	setValue(val);
 }

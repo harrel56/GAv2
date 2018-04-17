@@ -4,6 +4,7 @@
 #include "ISelection.h"
 #include "SolutionData.h"
 #include "ProgressWindow.h"
+#include "ProbabilityGenerator.h"
 
 #include <QtWidgets\qprogressbar.h>
 
@@ -15,9 +16,13 @@ public:
 	SolutionData *solve(BackpackProblem *bpp, ProgressWindow *bar);
 
 	void setSelection(ISelection *selection);
-	void setCancelled(bool state);
+	const ProbabilityGenerator& getGenerator();
 
 	static bool *copyArray(bool *data, int size);
+
+	const double fixedPenalty;
+	const double progressParam;
+	const double progressPower;
 
 private:
 	ISelection *selection;
@@ -28,10 +33,6 @@ private:
 	int crossPoints;
 	int repetitions;
 
-	double funParam1;
-	double funParam2;
-	double funParam3;
-
-	bool cancelled;
+	ProbabilityGenerator generator;
 
 };
