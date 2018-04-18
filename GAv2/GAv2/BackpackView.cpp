@@ -40,7 +40,6 @@ void BackpackView::draw(BackpackProblem *bpp, bool *individual)
 		if (individual[i])
 			pos += drawItem(bpp->getItems()[i], pos);
 
-	//std::cout << leftoverPixels << std::endl;
 	drawBackpackCap();
 	scene->update(scene->sceneRect());
 }

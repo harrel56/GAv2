@@ -39,7 +39,6 @@ private:
 	QCustomPlot *plotView;
 
 	QPushButton *clearButton;
-	QPushButton *removeButton;
 	QPushButton *createButton;
 
 	//Layouts

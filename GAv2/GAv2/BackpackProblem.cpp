@@ -36,5 +36,3 @@ const QVector<Item>& BackpackProblem::getItems() const { return items; }
 const QVector<SolutionData*>& BackpackProblem::getSolutions() const { return solutions; }
 
 void BackpackProblem::addSolution(SolutionData *solutionData) { solutions.append(solutionData); }
-
-//BackpackProblem::~BackpackProblem() { delete items; }

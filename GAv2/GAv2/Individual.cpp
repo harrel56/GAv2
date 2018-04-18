@@ -177,13 +177,15 @@ const Individual * Individual::getWorstIndividual(const vector<Individual>& pop)
 const double Individual::getAverageValue(const vector<Individual>& pop)
 {
 	double sum = 0.0;
+	int validCount = 0;
 
 	for (const Individual& ind : pop)
 	{
 		if (ind.isValid())
 		{
 			sum += ind.getTotalValue();
+			++validCount;
 		}
 	}
-	return sum / pop.size();
+	return validCount > 0 ? sum / validCount : 0.0;
 }

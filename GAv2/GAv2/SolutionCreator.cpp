@@ -225,19 +225,6 @@ BasicPage::BasicPage(QWidget * parent)
 	fixedPenaltyLayout(new QHBoxLayout), progressPenaltyLayout(new QHBoxLayout),
 	mutationFormLayout(new QFormLayout), crossoverFormLayout(new QFormLayout), generalFormLayout(new QFormLayout), validationFormLayout(new QFormLayout), mainGridLayout(new QGridLayout(this))
 {
-	//int defaultWidth = mRateEdit->sizeHint().width();
-	//mRateEdit->setFixedWidth(defaultWidth / 2);
-	//cRateEdit->setFixedWidth(defaultWidth / 2);
-	//pointsEdit->setFixedWidth(defaultWidth / 2);
-	//populationEdit->setFixedWidth(defaultWidth / 2);
-	//generationEdit->setFixedWidth(defaultWidth / 2);
-	//repetitionEdit->setFixedWidth(defaultWidth / 2);
-	//fixedEdit->setFixedWidth(defaultWidth / 2);
-	//progressEdit1->setFixedWidth(defaultWidth / 2);
-	//progressEdit2->setFixedWidth(defaultWidth / 2);
-
-	//mutationFormLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
-	//generalFormLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
 
 	mutationFormLayout->addRow(mRateLabel, mRateEdit);
 	crossoverFormLayout->addRow(cRateLabel, cRateEdit);

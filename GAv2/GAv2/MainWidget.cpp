@@ -8,7 +8,7 @@
 
 MainWidget::MainWidget(QWidget *parent)
 	: QWidget(parent), treeWidget(new QTreeWidget()), backpackView(new BackpackView), plotView(new QCustomPlot),
-	clearButton(new QPushButton("Clear plot")), removeButton(new QPushButton("Remove")), createButton(new QPushButton("Create new GA solution")),
+	clearButton(new QPushButton("Clear plot")), createButton(new QPushButton("Create new GA solution")),
 	buttonsVLayout(new QVBoxLayout()), leftVLayout(new QVBoxLayout()), mainHLayout(new QHBoxLayout(this)),
 	solutionCreator(nullptr),
 	dbManager("QSQLITE")
@@ -16,9 +16,6 @@ MainWidget::MainWidget(QWidget *parent)
 	this->setMinimumSize(1280, 720);
 	this->setAutoFillBackground(true);
 	this->setPalette(QPalette(QColor(255, 255, 255)));
-
-	//plotView->setStyleSheet("border:none;");
-	//backpackView->setStyleSheet("border:none;");
 
 	connect(clearButton, &QPushButton::clicked, [&]()
 	{
@@ -36,7 +33,6 @@ MainWidget::MainWidget(QWidget *parent)
 	});
 
 	buttonsVLayout->addWidget(clearButton);
-	buttonsVLayout->addWidget(removeButton);
 	buttonsVLayout->addWidget(createButton);
 
 	leftVLayout->addWidget(treeWidget);
@@ -242,6 +238,10 @@ void MainWidget::onTreeItemChanged(QTreeWidgetItem *item, int column)
 							backpackView->clear();
 						}
 					});
+				} 
+				else
+				{
+					plotItem->getGraph()->setSelectable(QCP::stNone);
 				}
 			}
 			else

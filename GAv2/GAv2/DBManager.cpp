@@ -72,7 +72,6 @@ QVector<BackpackProblem*> *DBManager::fetchProblems()
 
 			//Select time points
 			QVector<TimePoint> *timePoints = new QVector<TimePoint>(solQuery.value("GenerationCount").toInt());
-			//timePoints->reserve(solQuery.value("GenerationCount").toInt());
 			QSqlQuery pointsQuery("SELECT * FROM TimePoints WHERE IdSolution=?");
 			pointsQuery.bindValue(0, solQuery.value("IdSolution"));
 			pointsQuery.exec();
